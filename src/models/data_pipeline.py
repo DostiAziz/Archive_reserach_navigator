@@ -28,10 +28,8 @@ class DataPipeline:
         Returns:
             List[Dict]: List of search results.
         """
-        if category == "all":
-            search_query = f'all:"{query}"'
-        else:
-            search_query = f'{category}:"{query}"'
+
+        search_query = f'{category}:"{query}"'
 
         params = {
             'search_query': search_query,
@@ -41,14 +39,11 @@ class DataPipeline:
             'sortOrder': sort_order,
         }
 
-        logger.info(f"Search query: {search_query}")
-        logger.info(f"Request params: {params}")
-
         response = requests.get(self.base_url, params=params)
         logger.info(f"Search response status: {response.status_code}")
+
         if response.status_code != requests.codes.ok:
             logger.error(f"Search query failed with status code: {response.status_code}")
-            logger.error(f"Response text: {response.text}")
             raise Exception(f"Search query failed with status code: {response.status_code}")
 
         return self._parse_arxiv_response(response.text)
@@ -70,6 +65,7 @@ class DataPipeline:
             papers = []
 
             for entry in root.findall('atom:entry', ns):
+
                 paper = {
                     'title': entry.find('atom:title', ns).text.strip(),
                     'abstract': entry.find('atom:summary', ns).text.strip().replace('\n', ' '),
@@ -97,8 +93,10 @@ class DataPipeline:
             raise e
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    pipeline = DataPipeline()
-    results = pipeline.search_paper(query="Speech AI")
-    print(results)
+# if __name__ == "__main__":
+#     logging.basicConfig(level=logging.INFO)
+#     pipeline = DataPipeline()
+#     results = pipeline.search_paper(query="RAG",max_results=200)
+#     for result in results:
+#         print(result)
+#
