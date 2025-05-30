@@ -1,15 +1,13 @@
+import logging
+import os
+from typing import List, Dict
 import pandas as pd
 import torch
-from typing import List, Dict
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-import os
-
 from langchain_core.documents import Document
-
-from config import Config
-import logging
+from langchain_huggingface import HuggingFaceEmbeddings
+from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,6 +17,7 @@ class DocumentProcessor:
 
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        logger.info(f"Using device: {device}")
         self.embedding_model = HuggingFaceEmbeddings(model_name=embedding_model,
                                                      model_kwargs={'device': device},
                                                      encode_kwargs={'normalize_embeddings': True}
@@ -26,28 +25,31 @@ class DocumentProcessor:
         self.persistent_directory = Config.VECTOR_STORE_DIR
         os.makedirs(self.persistent_directory, exist_ok=True)
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=Config.CHUNK_SIZE,
-                                                            chunk_overlap=Config.OVERLAPP,
+                                                            chunk_overlap=Config.OVERLAP,
                                                             length_function=len)
 
         self.vectorstore = None
         logger.info(f"Document processor initialized")
 
     def prepare_documents(self, paper_df: pd.DataFrame) -> List[Document]:
-        """Convert dataframe of retried paper information to proper langchain documents.
+        """Convert dataframe containng retrieved paper information for langchain documents
         Args:
-            paper_df (pd.DataFrame): paper data frame
+            paper_df: paper dataframe
         Returns:
-            List[Document]: list of langchain documents
+            List[Document] list containing paper documents in langchain format
         """
-
         logger.info(f'converting {paper_df.shape[0]} paper documents')
         documents = []
         try:
-            for index, paper in paper_df.iterrows():
-                content = f"Title: {paper.title}\n\nAbstract: {paper.abstract}\n\n"
+            for index, paper in tqdm(paper_df.iterrows(), desc="Creating langchain documents", total=paper_df.shape[0]):
+                # create content by combining title and abstract
+                title = paper.title
+                abstract = paper.abstract
+                content = f"Title: {title}\nAbstract: {abstract}"
 
+                # create metadata for each document
                 metadata = {
-                    'title': paper.title,
+                    'title': title,
                     'doi': paper.doi,
                     'authors': paper.authors,
                     'categories': paper.categories,
@@ -55,10 +57,10 @@ class DocumentProcessor:
                 }
                 doc = Document(page_content=content, metadata=metadata)
                 documents.append(doc)
-            logger.info(f'converted {len(documents)} langchain documents')
+
             return documents
         except Exception as e:
-            logger.error(f'failed to convert {paper_df.shape[0]} paper documents')
+            logger.error(f'failed to convert {paper_df.shape[0]} paper documents: {e}')
             raise e
 
     def chunk_documents(self, documents: List[Document]) -> List[Document]:
@@ -69,7 +71,6 @@ class DocumentProcessor:
             List[Document]: list of chunks of documents
        """
         try:
-
             chunks = self.text_splitter.split_documents(documents)
             logger.info('finished chunking documents')
             return chunks
@@ -78,34 +79,57 @@ class DocumentProcessor:
             raise e
 
     def build_vectorstore(self, documents: List[Document], collection_name: str = 'research_papers'):
-        """Create ChromaDB vectorstore from chunked documents
+        """Builds verctor database for the list of langchain documents,
+        first deletes exising vector databases for that collection name
         Args:
-            documents (List[Document]): list of chunked documents
+            documents (List[Document]): list of documents
             collection_name (str, optional): collection name. Defaults to 'research_papers'.
         Returns:
             None
-
         """
-        try:
-            logger.info(f'building {collection_name} vectorstore')
-            self.vectorstore = Chroma(collection_name=collection_name, embedding_function=self.embedding_model,
-                                      persist_directory=self.persistent_directory)
-            logger.info('Adding documents to vectorstore')
-            self.vectorstore.add_documents(documents)
 
-            logger.info(f' Collection {collection_name} contains {self.vectorstore._collection.count()} documents')
+        try:
+            try:
+                import chromadb
+                # retrieve database instance and delete it if exists
+                client = chromadb.PersistentClient(path=self.persistent_directory)
+                client.delete_collection(name=collection_name)
+                logger.info(f'Successfully deleted {collection_name} vectorstore')
+            except Exception as e:
+                logger.error(f'failed to create {collection_name} vectorstore: {e}')
+
+
+            logger.info(f'Building {collection_name} vectorstore')
+
+            # Create an empty vectorstore
+            self.vectorstore = Chroma(
+                embedding_function=self.embedding_model,
+                persist_directory=self.persistent_directory,
+                collection_name=collection_name,
+                collection_metadata={"hnsw:space": "cosine"}
+            )
+            # Add documents in batches
+            batch_size = 100
+            total_added = 0
+            for i in range(0, len(documents), batch_size):
+                batch = documents[i:i + batch_size]
+                texts = [doc.page_content for doc in batch]
+                metadatas = [doc.metadata for doc in batch]
+                self.vectorstore.add_texts(texts=texts, metadatas=metadatas)
+                total_added += len(batch)
+                logger.info(f'Added batch {i // batch_size + 1}, total documents: {total_added}')
+
+            logger.info(f'Collection {collection_name} contains {self.vectorstore._collection.count()} documents')
 
         except Exception as e:
-            logger.error(f'failed to build {collection_name} vectorstore')
+            logger.error(f'failed to build {collection_name} vectorstore: {e}')
             raise e
 
     def load_vectorstore(self, collection_name: str = 'research_papers'):
         """Load vectorstore from collection
         Args:
             collection_name (str, optional): collection name. Defaults to 'research_papers'.
-
         """
-
         try:
             self.vectorstore = Chroma(collection_name=collection_name, embedding_function=self.embedding_model,
                                       persist_directory=self.persistent_directory)
@@ -121,65 +145,65 @@ class DocumentProcessor:
             score_threshold (float, optional): threshold for similarity. Defaults to 0.8.
         Returns:
             List[Dict]: list of dictionaries containing relevant information
-
         """
         try:
-            results = self.vectorstore.similarity_search_with_score(query, k=k, score_threshold=score_threshold)
+            # get more results to allow for better filtering
+            query_results = self.vectorstore.similarity_search_with_score(query, k=k)
+
+            # sort returned results from most similar to less
+            query_results = sorted(query_results, key=lambda x: x[1], reverse=True)
             formatted_results = []
-            for index, (doc, score) in enumerate(results):
-                if score > score_threshold:
-                    result = {'rank': index + 1,
-                              'similarity_score': score,
-                              'content': doc.page_content,
-                              'metadata': doc.metadata
-                              }
-                    formatted_results.append(result)
-            logger.info(f'Query {query} returned {len(results)} relevant papers')
+
+            for index, (doc, score) in enumerate(query_results):
+                result = {'rank': index + 1,
+                          'similarity_score': score,
+                          'content': doc.page_content,
+                          'metadata': doc.metadata
+                          }
+                formatted_results.append(result)
+
+            logger.info(f'Query {query} returned {len(query_results)} relevant papers')
             return formatted_results
+
         except Exception as e:
             logger.error(f'failed to query {query}')
             raise e
 
     def get_retriever(self, search_kwargs: Dict = None):
-        """Get langchain retriever for RAG
-        Args:
-            search_kwargs (Dict): parameter for search (e.g {'query':AI, 'k':5}
-        """
-
+        """Get langchain retriever for RAG"""
         try:
             if not self.vectorstore:
-                logger.info(f'retrieving vectorstore from {self.vectorstore._collection.count()} documents')
-                raise ValueError('no vectorstore found, create or initialize vectorstore first')
+                raise ValueError('No vectorstore found, create or initialize vectorstore first')
+
+            logger.info(f'Creating retriever from vectorstore with {self.vectorstore._collection.count()} documents')
 
             if search_kwargs is None:
                 search_kwargs = {'k': 5}
 
-            return self.vectorstore.get_retriever(**search_kwargs)
+            return self.vectorstore.as_retriever(search_kwargs=search_kwargs)
         except Exception as e:
-            logger.error(f'failed to retrieve retriever for {search_kwargs}')
+            logger.error(f'Failed to create retriever: {e}')
             raise e
 
 
 if __name__ == '__main__':
     from data_pipeline import DataPipeline
+    from config import Config
 
     pipeline = DataPipeline()
-    results = pipeline.search_paper(query="RAG", max_results=200)
+    results = pipeline.search_paper(query="RAG", max_results=2000)
     results_df = pd.DataFrame(results)
+
     doc_processor = DocumentProcessor()
     prepared_doc = doc_processor.prepare_documents(results_df)
-    chunked_docs = doc_processor.chunk_documents(prepared_doc)
+    # uncomment this line if you want to chunk the files
+    # prepared_doc = doc_processor.chunk_documents(prepared_doc)
 
-    #create vector store
-    doc_processor.build_vectorstore(chunked_docs)
+    # Create a vector store
+    doc_processor.build_vectorstore(prepared_doc)
 
-
-    queries = [
-            "Deep learning neural networks",
-            "natural language processing",
-            "rag for medicine"
-    ]
-
-
-    print(f'\n'+ "="*50)
-
+    # Using get_retriever (for RAG pipelines)
+    retriever = doc_processor.get_retriever({'k': 5})
+    docs = retriever.invoke("What is RAG?")
+    for doc in docs:
+        print(f"Content: {doc.page_content}")

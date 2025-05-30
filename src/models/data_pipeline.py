@@ -1,7 +1,7 @@
 import logging
 import xml.etree.ElementTree as ET
 from typing import List, Dict
-
+from tqdm import tqdm
 import requests
 
 logger = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ class DataPipeline:
             ns = {'atom': 'http://www.w3.org/2005/Atom'}
             papers = []
 
-            for entry in root.findall('atom:entry', ns):
+            for entry in tqdm(root.findall('atom:entry', ns), desc="Retrieving papers"):
 
                 paper = {
                     'title': entry.find('atom:title', ns).text.strip(),
