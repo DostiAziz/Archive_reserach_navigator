@@ -31,7 +31,7 @@ class QAEngine():
     def _initialize_llm(self, model_id: str = 'genai'):
 
         if model_id == 'genai' and os.environ.get("GEMINI_API_KEY"):
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=Config.GEMINI_API_KEY)
+            self.llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=os.getenv("GEMINI_API_KEY"))
 
         elif model_id == 'huggingface':
             model_name = "microsoft/DialoGPT-medium"
