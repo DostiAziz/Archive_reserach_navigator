@@ -1,3 +1,4 @@
+import os
 from typing import List, Dict
 
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -29,7 +30,7 @@ class QAEngine():
 
     def _initialize_llm(self, model_id: str = 'genai'):
 
-        if model_id == 'genai':
+        if model_id == 'genai' and os.environ.get("GEMINI_API_KEY"):
             self.llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=Config.GEMINI_API_KEY)
 
         elif model_id == 'huggingface':
@@ -66,7 +67,7 @@ class QAEngine():
         try:
             for index, result in enumerate(retrieved_results):
                 content = content + " " + result["content"]
-                sources += f'{index+1}- {result["metadata"]["title"]}\n'
+                sources += f'{index + 1}- {result["metadata"]["title"]}\n'
             final_content = f'Content: {content} + "\n\n" + Sources:\n {sources}'
             logger.info(f'Formatted results {final_content}')
             return final_content
