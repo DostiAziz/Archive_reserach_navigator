@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+   build: .
+   ports:
+     - "8000:8000"
+   environment:
+    # Pass the environment variables here
+    - GEMINI_API_KEY=${GEMINI_API_KEY}
+    - OPENAI_API_KEY=${OPENAI_API_KEY}
+    - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    - ENVIRONMENT=docker
+
+   volumes:
+    # Mount a data directory if needed
+    - ./data:/app/data
+    - ./logs:/app/logs
+   restart: unless-stopped
+
