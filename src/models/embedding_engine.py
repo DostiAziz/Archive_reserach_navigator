@@ -12,7 +12,7 @@ from tqdm import tqdm
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
+from src.models.config import  Config
 class DocumentProcessor:
 
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
@@ -137,12 +137,11 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f'failed to load {collection_name} vectorstore')
 
-    def query_vectorstore(self, query: str, k: int = 5, score_threshold: float = 0.8) -> List[Dict]:
+    def query_vectorstore(self, query: str, k: int = 5) -> List[Dict]:
         """Query the knowledge base using sematic similarity
         Args:
             query (str): question to be asked
             k (int, optional): number of similar documents to return. Defaults to 5.
-            score_threshold (float, optional): threshold for similarity. Defaults to 0.8.
         Returns:
             List[Dict]: list of dictionaries containing relevant information
         """
@@ -187,8 +186,8 @@ class DocumentProcessor:
 
 
 if __name__ == '__main__':
-    from data_pipeline import DataPipeline
-    from config import Config
+    from src.models.data_pipeline import DataPipeline
+    from src.models.config import Config
 
     pipeline = DataPipeline()
     results = pipeline.search_paper(query="RAG", max_results=2000)
@@ -202,8 +201,3 @@ if __name__ == '__main__':
     # Create a vector store
     doc_processor.build_vectorstore(prepared_doc)
 
-    # Using get_retriever (for RAG pipelines)
-    retriever = doc_processor.get_retriever({'k': 5})
-    docs = retriever.invoke("What is RAG?")
-    for doc in docs:
-        print(f"Content: {doc.page_content}")
