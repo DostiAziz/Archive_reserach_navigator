@@ -88,7 +88,7 @@ class QAEngine():
                 self._setup_gemini_llm()
             elif model_id == 'openai':
                 self._setup_openai_llm()
-            elif model_id == 'hf':
+            elif model_id == 'huggingface':
                 self._setup_local_llm()
         except Exception as e:
             logger.error(f"Failed to initialize language model {model_id}: {e}")
