@@ -49,6 +49,7 @@ def setup_logging(log_level: str = "INFO"):
         "data_pipeline": logging.getLogger('data_pipeline'),
         "embedding_engine": logging.getLogger('embedding_engine'),
         "main": logging.getLogger('main'),
+        'streamlit': logging.getLogger('streamlit'),
     }
     return loggers
 
