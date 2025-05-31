@@ -1,10 +1,11 @@
-import logging
 import xml.etree.ElementTree as ET
 from typing import List, Dict
 from tqdm import tqdm
 import requests
+from src.utils.logger_config import get_logger
 
-logger = logging.getLogger(__name__)
+
+logger = get_logger("data_pipeline")
 
 
 class DataPipeline:
@@ -14,7 +15,7 @@ class DataPipeline:
     def search_paper(self, query: str, category: str = "all", max_results: int = 10,
                      sort_by: str = "relevance", sort_order: str = "descending") -> List[Dict]:
         """
-        Searches for academic papers on an online repository using a query and optional
+         Searches for academic papers on an online repository using a query and optional
         filtering and sorting parameters. This function constructs a search query, sends
         an HTTP GET request to the API, and processes the response to retrieve the result
         set.
@@ -93,10 +94,8 @@ class DataPipeline:
             raise e
 
 
-# if __name__ == "__main__":
-#     logging.basicConfig(level=logging.INFO)
-#     pipeline = DataPipeline()
-#     results = pipeline.search_paper(query="RAG",max_results=200)
-#     for result in results:
-#         print(result)
-#
+if __name__ == "__main__":
+    pipeline = DataPipeline()
+    results = pipeline.search_paper(query="RAG", max_results=200)
+    for result in results:
+        print(result)

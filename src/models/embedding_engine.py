@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import List, Dict
 import pandas as pd
@@ -8,11 +7,13 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
+from src.utils.logger_config import get_logger
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from src.models.config import Config
 
-from src.models.config import  Config
+logger = get_logger("embedding-engine")
+
+
 class DocumentProcessor:
 
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
@@ -97,7 +98,6 @@ class DocumentProcessor:
                 logger.info(f'Successfully deleted {collection_name} vectorstore')
             except Exception as e:
                 logger.error(f'failed to create {collection_name} vectorstore: {e}')
-
 
             logger.info(f'Building {collection_name} vectorstore')
 
@@ -185,19 +185,18 @@ class DocumentProcessor:
             raise e
 
 
-if __name__ == '__main__':
-    from src.models.data_pipeline import DataPipeline
-    from src.models.config import Config
-
-    pipeline = DataPipeline()
-    results = pipeline.search_paper(query="RAG", max_results=2000)
-    results_df = pd.DataFrame(results)
-
-    doc_processor = DocumentProcessor()
-    prepared_doc = doc_processor.prepare_documents(results_df)
-    # uncomment this line if you want to chunk the files
-    # prepared_doc = doc_processor.chunk_documents(prepared_doc)
-
-    # Create a vector store
-    doc_processor.build_vectorstore(prepared_doc)
-
+# if __name__ == '__main__':
+#     from src.models.data_pipeline import DataPipeline
+#     from src.models.config import Config
+#
+#     pipeline = DataPipeline()
+#     results = pipeline.search_paper(query="RAG", max_results=2000)
+#     results_df = pd.DataFrame(results)
+#
+#     doc_processor = DocumentProcessor()
+#     prepared_doc = doc_processor.prepare_documents(results_df)
+#     # uncomment this line if you want to chunk the files
+#     # prepared_doc = doc_processor.chunk_documents(prepared_doc)
+#
+#     # Create a vector store
+#     doc_processor.build_vectorstore(prepared_doc)
