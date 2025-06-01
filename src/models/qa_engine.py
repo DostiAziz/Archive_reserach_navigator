@@ -1,3 +1,6 @@
+import types
+import torch
+
 import os
 from typing import List, Dict
 from dotenv import load_dotenv
@@ -5,12 +8,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFacePipeline
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-import torch
 from transformers import pipeline
-from transformers.utils.doc import MODELS_TO_PIPELINE
 
-from src.models.embedding_engine import DocumentProcessor
-from src.utils.logger_config import get_logger
+from models.embedding_engine import DocumentProcessor
+from utils.logger_config import get_logger
 
 load_dotenv()
 
@@ -19,11 +20,11 @@ logger = get_logger("qa_engine")
 
 class QAEngine():
     # Constants
-    DEFAULT_SEARCH_RESULTS = 50
+    DEFAULT_SEARCH_RESULTS = 5
     LOCAL_MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
     TEMPERATURE = 0.1
 
-    def __init__(self, llm: str = 'genai', doc_processor: DocumentProcessor = None, ):
+    def __init__(self, llm: str = 'genai', doc_processor: DocumentProcessor = None, vs_instance_name: str = ""):
 
         if doc_processor is None:
             logger.error("No doc processor defined")
@@ -33,7 +34,7 @@ class QAEngine():
         self.llm = None
         self.qa_chain = None
         self._initialize_llm(llm)
-        self.emb_engine.load_vectorstore()
+        self.emb_engine.load_vectorstore(collection_name=vs_instance_name)
 
     def _setup_gemini_llm(self, model_name):
         """Setup google gemini llm
@@ -41,6 +42,7 @@ class QAEngine():
          :param model_name: google gemini llm name
         """
         gemini_api_key = os.getenv("GEMINI_API_KEY")
+
         if not gemini_api_key:
             logger.error("Gemini api key is not set")
             raise ValueError("Gemini api key is not found in the environment variables")
@@ -69,8 +71,8 @@ class QAEngine():
                 model=self.LOCAL_MODEL_NAME,
                 tokenizer=self.LOCAL_MODEL_NAME,
                 do_sample=True,
-                temperature=self.TEMPERATURE,
-                device=0 if torch.cuda.is_available() else -1
+                temperature=self.TEMPERATURE
+
             )
             self.llm = HuggingFacePipeline(pipeline=pipe)
             logger.info("Local LLM loaded successfully")
@@ -85,7 +87,7 @@ class QAEngine():
         """
         try:
             if model_id == 'genai':
-                self._setup_gemini_llm()
+                self._setup_gemini_llm(model_name="Gemini 2.0 Flash-Lite")
             elif model_id == 'openai':
                 self._setup_openai_llm()
             elif model_id == 'huggingface':
@@ -109,8 +111,8 @@ class QAEngine():
         try:
             logger.info("Formating retrieved results")
             for index, result in enumerate(retrieved_results):
-                content = content + " " + result["content"]
-                sources += f'{index + 1}- {result["metadata"]["title"]}\n'
+                content = content + "\n" + result["content"]
+                sources += f'{index + 1}- {result["metadata"]["title"]}_'
 
             final_content = f'Content: {content} + "\n\n" + Sources:\n {sources}'
             logger.info(f'Length of formatted results {len(final_content)}')
@@ -181,8 +183,7 @@ class QAEngine():
             logger.error(f"Error generating answer: {e}")
             return f"Sorry, I encountered an error while processing your query: {str(e)}"
 
-
-if __name__ == '__main__':
-    from src.models.embedding_engine import DocumentProcessor
-
-    qa_engine = QAEngine(llm='huggingface', doc_processor=DocumentProcessor())
+# if __name__ == '__main__':
+#     from src.models.embedding_engine import DocumentProcessor
+#
+#     qa_engine = QAEngine(llm='huggingface', doc_processor=DocumentProcessor())
