@@ -7,9 +7,9 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
-from src.utils.logger_config import get_logger
+from utils.logger_config import get_logger
 
-from src.models.config import Config
+from config import Config
 
 logger = get_logger("embedding-engine")
 
@@ -51,7 +51,7 @@ class DocumentProcessor:
                 # create metadata for each document
                 metadata = {
                     'title': title,
-                    'doi': paper.doi,
+                    'id': paper.id,
                     'authors': paper.authors,
                     'categories': paper.categories,
                     'published': paper.published,
@@ -146,6 +146,7 @@ class DocumentProcessor:
             List[Dict]: list of dictionaries containing relevant information
         """
         try:
+            logger.info(f'Querying knowledge base using {query}')
             # get more results to allow for better filtering
             query_results = self.vectorstore.similarity_search_with_score(query, k=k)
 
@@ -184,10 +185,10 @@ class DocumentProcessor:
             logger.error(f'Failed to create retriever: {e}')
             raise e
 
-
+#
 # if __name__ == '__main__':
-#     from src.models.data_pipeline import DataPipeline
-#     from src.models.config import Config
+#     from models.data_pipeline import DataPipeline
+#     from models.config import Config
 #
 #     pipeline = DataPipeline()
 #     results = pipeline.search_paper(query="RAG", max_results=2000)
