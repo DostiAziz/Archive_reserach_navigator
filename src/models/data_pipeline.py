@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from typing import List, Dict
 from tqdm import tqdm
 import requests
-from src.utils.logger_config import get_logger
+from utils.logger_config import get_logger
 
 
 logger = get_logger("data_pipeline")
@@ -39,7 +39,6 @@ class DataPipeline:
             'sortBy': sort_by,
             'sortOrder': sort_order,
         }
-
         response = requests.get(self.base_url, params=params)
         logger.info(f"Search response status: {response.status_code}")
 
@@ -70,8 +69,9 @@ class DataPipeline:
                 paper = {
                     'title': entry.find('atom:title', ns).text.strip(),
                     'abstract': entry.find('atom:summary', ns).text.strip().replace('\n', ' '),
-                    'doi': entry.find('atom:id', ns).text.strip(),
-                    'published': entry.find('atom:published', ns).text.strip()
+                    'id': entry.find('atom:id', ns).text.strip(),
+                    'published': entry.find('atom:published', ns).text.strip(),
+                    'updated': entry.find('atom:updated', ns).text.strip(),
                 }
 
                 authors = []
@@ -94,8 +94,8 @@ class DataPipeline:
             raise e
 
 
-if __name__ == "__main__":
-    pipeline = DataPipeline()
-    results = pipeline.search_paper(query="RAG", max_results=200)
-    for result in results:
-        print(result)
+# if __name__ == "__main__":
+#     pipeline = DataPipeline()
+#     results = pipeline.search_paper(query="RAG", max_results=200)
+#     for result in results:
+#         print(result)
