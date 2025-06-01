@@ -1,18 +1,18 @@
 import streamlit as st
 import pandas as pd
-import sys
-import os
 from datetime import datetime
 import time
-from typing import List, Dict, Optional
-import plotly.express as px
-import plotly.graph_objects as go
+from typing import List, Dict
+from src.models.data_pipeline import  DataPipeline
+from src.models.embedding_engine import  DocumentProcessor
 
+from src.utils.logger_config import get_logger
 
+logger = get_logger('streamlit')
 
 # Configure Streamlit page
 st.set_page_config(
-    page_title="AI Research Paper Navigator",
+    page_title="Your AI Research Paper Navigator",
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -136,7 +136,7 @@ def initialize_session_state():
 
 def display_header():
     """Display the main application header"""
-    st.markdown('<h1 class="main-header">🔬 AI Research Paper Navigator</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🔬 Your AI Research Paper Navigator</h1>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -146,8 +146,6 @@ def display_header():
             <p style="color: #666; margin: 0.5rem 0 0 0;">Powered by LangChain, ChromaDB, and Transformer models</p>
         </div>
         """, unsafe_allow_html=True)
-
-
 
 def display_sidebar():
     """Configure and display the sidebar with input controls"""
@@ -176,7 +174,7 @@ def display_sidebar():
         col = suggestion_cols[i % 2]
         if col.button(suggestion, key=f"suggestion_{i}"):
             st.session_state.search_query = suggestion
-            st.experimental_rerun()
+            st.rerun()
 
     st.sidebar.markdown("---")
 
@@ -306,7 +304,7 @@ def collect_papers_with_progress(params: Dict):
         display_progress_tracker(steps)
         time.sleep(0.5)  # Visual feedback
 
-        loader = ArxivDataLoader()
+        loader = DataPipeline()
         steps[0].update({'status': 'completed', 'details': 'arXiv loader ready'})
         display_progress_tracker(steps)
 
@@ -314,7 +312,7 @@ def collect_papers_with_progress(params: Dict):
         steps[1].update({'status': 'processing', 'details': f"Searching for '{params['query']}'..."})
         display_progress_tracker(steps)
 
-        papers_data = loader.search_papers(
+        papers_data = loader.search_paper(
             query=params['query'],
             max_results=params['num_docs'],
             category=params['category']
@@ -337,8 +335,8 @@ def collect_papers_with_progress(params: Dict):
         processor = DocumentProcessor(embedding_model=params['embedding_model'])
         st.session_state.processor = processor
 
-        documents = processor.papers_to_documents(papers_df)
-        split_docs = processor.split_documents(documents)
+        documents = processor.prepare_documents(papers_df)
+        split_docs = processor.chunk_documents(documents)
 
         steps[2].update({'status': 'completed', 'details': f'Created {len(split_docs)} chunks'})
         display_progress_tracker(steps)
@@ -348,7 +346,7 @@ def collect_papers_with_progress(params: Dict):
         display_progress_tracker(steps)
 
         collection_name = f"papers_{int(time.time())}"
-        processor.create_vectorstore(split_docs, collection_name=collection_name)
+        processor.build_vectorstore(split_docs, collection_name=collection_name)
 
         steps[3].update({'status': 'completed', 'details': 'Vector database ready!'})
         display_progress_tracker(steps)
