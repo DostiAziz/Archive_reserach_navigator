@@ -1,4 +1,10 @@
+from datetime import time
+from typing import Dict
+
+import pandas as pd
 import streamlit as st
+from src.models.data_pipeline import DataPipeline
+from src.models.embedding_engine import DocumentProcessor
 
 # Configure Streamlit page
 st.set_page_config(
@@ -129,8 +135,7 @@ def display_header():
     st.markdown('<h1 class="main-header">🔬 Your AI Research Paper Navigator</h1>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
-    with col1:
-        st.markdown(""" Developed by Dosti""", unsafe_allow_html=True)
+
     with col2:
         st.markdown("""
         <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; margin: 1rem 0;">
@@ -138,10 +143,6 @@ def display_header():
             <p style="color: #666; margin: 0.5rem 0 0 0;">Powered by LangChain, ChromaDB, and Transformer models</p>
         </div>
         """, unsafe_allow_html=True)
-
-
-initialize_session_state()
-display_header()
 
 
 def display_sidebar():
@@ -206,8 +207,116 @@ def display_sidebar():
         help="Filter papers by arXiv category"
     )
 
+    # Sort order
+    st.sidebar.subheader("📊 Sort Order")
+    sort_orders = {
+        "Relevance": "relevance",
+        "Most Recent": "lastUpdatedDate",
+
+    }
+
+    selected_sort = st.sidebar.selectbox(
+        "Sort Results By",
+        options=list(sort_orders.keys())
+    )
+
+    return {
+        'query': query,
+        'num_docs': num_docs,
+        'category': categories[selected_category],
+        'sort_order': sort_orders[selected_sort],
+
+    }
 
 
+def display_progress_step(step_num: int, title: str, status: str, details: str):
+    """Display the progress step with status
+    Args:
+        :param step_num (int) number of the current progress step
+        :param title (str) title of the progress step
+        :param status (str) status of the progress step
+        :param details (str) details of the progress step
+    """
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col1:
+        if status == 'completed':
+            st.success("✅")
+        if status == 'processing':
+            st.warning("⏳")
+        elif status == "error":
+            st.error("❌")
+        else:
+            st.info("⏸️")
+
+    with col2:
+        st.write(f"**step {step_num}: {title}**")
+        if details:
+            st.caption(details)
+
+    with col3:
+        if status == 'completed':
+            st.markdown("**Completed**")
+        elif status == "processing":
+            st.markdown("**Processing...**")
+        elif status == "error":
+            st.markdown("**Error**")
+        else:
+            st.markdown("Pending")
+
+
+def collect_papers_with_parameter(params: Dict):
+    """Using the submitted parameter for collecting papers
+    Args:
+        :params (Dict): A dictionary containing all the submitted parameters
+
+    """
+    st.subheader("📚 Building Your Research Database Using collected papers")
+
+    # progress tracking
+    progress_container = st.container()
+    with progress_container:
+        try:
+            display_progress_step(1, "Initialize connection with Archive endpoint", "processing", "Setting up..")
+            loader = DataPipeline()
+            paper_data = loader.search_paper(query=params["query"],
+                                             category=params["category"],
+                                             max_results=params["num_docs"],
+                                             sort_by=params["sort_order"]
+                                             )
+
+            if not paper_data:
+                display_progress_step(2, "Search papers", "Error", "No papers found")
+                st.error("❌ No papers found. Try different keywords.")
+                return None
+            display_progress_step(2, "Search papers", "Completed", f"Found {len(paper_data)} papers")
+
+            display_progress_step(3, "Processing papers", "processing", "Converting to required format")
+
+            papers_df = pd.DataFrame(data=paper_data)
+            doc_processor = DocumentProcessor()
+            documents = doc_processor.prepare_documents(papers_df)
+            # uncomment this line if you want to chunk the documents
+            # document_chunks = doc_processor.chunk_documents(documents)
+            display_progress_step(3, "Processing papers", "Completed", f"Created {len(documents)} documents")
+
+            # step 4 build vector databases
+            display_progress_step(4, "Building your Research Database", "processing", "Create embeddings")
+
+            collection_name = f"papers_{int(time.time())}"
+            doc_processor.build_vectorstore(documents, collection_name)
+            display_progress_step(4, "Build Vector Database", "Completed", "Database is ready :)")
+
+            st.session_state.processor = doc_processor
+            st.session_state.collection_name = collection_name
+            st.session_state.vectorstore_ready = True
+
+            st.success("🎉 Collection completed successfully!")
+            return papers_df
+
+        except Exception as e:
+            st.error(f"❌ Error during collection: {str(e)}")
+            return None
 
 
 display_sidebar()
