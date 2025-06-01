@@ -13,7 +13,7 @@ def setup_logging(log_level: str = "INFO"):
     if isinstance(log_level, str):
         log_level = getattr(logging, log_level.upper())
 
-    log_dir = Path("logs")
+    log_dir = Path("../logs")
     log_dir.mkdir(parents=True, exist_ok=True)
     (log_dir / "app").mkdir(exist_ok=True)
     (log_dir / "errors").mkdir(exist_ok=True)
