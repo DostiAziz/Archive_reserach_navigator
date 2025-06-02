@@ -286,3 +286,38 @@ def display_sidebar():
         'sort_order': sort_orders[selected_sort],
     }
 
+
+def display_progress_step(step_num: int, title: str, status: str, details: str):
+    """Display the progress step with status
+    Args:
+        :param step_num (int) number of the current progress step
+        :param title (str) title of the progress step
+        :param status (str) status of the progress step
+        :param details (str) details of the progress step
+    """
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col1:
+        if status == 'completed':
+            st.success("✅")
+        elif status == 'processing':
+            st.warning("⏳")
+        elif status == "error":
+            st.error("❌")
+        else:
+            st.info("⏸️")
+
+    with col2:
+        st.write(f"**step {step_num}: {title}**")
+        if details:
+            st.caption(details)
+
+    with col3:
+        if status == 'completed':
+            st.markdown("**Completed**")
+        elif status == "processing":
+            st.markdown("**Processing...**")
+        elif status == "error":
+            st.markdown("**Error**")
+        else:
+            st.markdown("Pending")
