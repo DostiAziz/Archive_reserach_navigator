@@ -179,5 +179,5 @@ cython_debug/
 /src/pages/*
 /src/pages
 
-/data/*/*
+/data
 Dockerfile
