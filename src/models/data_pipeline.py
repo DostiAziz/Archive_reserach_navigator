@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from typing import List, Dict
 from tqdm import tqdm
 import requests
-from src.utils.logger_config import get_logger
+from utils.logger_config import get_logger
 
 
 logger = get_logger("data_pipeline")
@@ -97,7 +97,7 @@ class DataPipeline:
                         sort_order: str = "descending") -> List[Dict]:
         """Process list of queries which seperated by, for retrieving papers from api
         Args:
-            :param query: search queries separated by ,
+            :param query: search queries separated by,
             :param category: search category
             :param max_results: maximum number of results to return
             :param sort_by: sort by
