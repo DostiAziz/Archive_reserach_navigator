@@ -191,3 +191,21 @@ def display_system_status():
         </div>
         """, unsafe_allow_html=True)
 
+
+def display_sidebar():
+    """Configure and display the sidebar with input controls"""
+    st.sidebar.title("🎛️ Search Configuration")
+    st.sidebar.markdown("---")
+
+    # Search parameters
+    st.sidebar.subheader("📝 Search Parameters")
+    collection_name = st.sidebar.text_input("Collection Name",
+                                            placeholder="Enter a collection name",
+                                            help="Name that is used for your collected papers",
+                                            key="collection_name", required=True)
+    query = st.sidebar.text_input(
+        "Research Query, for multi query separate them by **,** ",
+        placeholder="e.g., machine learning, transformers, computer vision",
+        help="Enter keywords or topics you want to research",
+        key="search_query", required=True
+    )
