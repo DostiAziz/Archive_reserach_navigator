@@ -15,11 +15,11 @@ st.title("📊 Collection Analytics Dashboard")
 if st.session_state.get('papers_data') is None:
     st.warning("⚠️ No data available. Please collect papers from the main page first.")
     if st.button("🏠 Go to Main Page"):
-        st.switch_page("streamlit_app.py")
+        st.switch_page("../Main.py")
     st.stop()
 
 papers_df = st.session_state.papers_data
-
+print(papers_df)
 
 # Analytics content
 def display_analytics_dashboard(papers_df):

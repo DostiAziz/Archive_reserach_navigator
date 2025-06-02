@@ -1,15 +1,5 @@
-import types
-import torch
 import os
-
-os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
-
-# Prevent Streamlit from trying to inspect torch.classes as a package
-if isinstance(torch.classes, types.ModuleType) and not hasattr(torch.classes, '__path__'):
-    torch.classes.__path__ = []
-import nest_asyncio
-nest_asyncio.apply()
-
+from models.qa_engine import QAEngine
 from datetime import datetime
 from typing import Dict
 import pandas as pd
@@ -18,8 +8,6 @@ import streamlit as st
 from models.data_pipeline import DataPipeline
 from models.embedding_engine import DocumentProcessor
 from utils.logger_config import setup_logging
-
-setup_logging(log_level=os.getenv('LOG_LEVEL', 'INFO'))
 
 # Configure Streamlit page
 st.set_page_config(
@@ -133,6 +121,7 @@ def initialize_session_state():
         'papers_data': "all",
         'vectorstore_ready': False,
         'processor': None,
+        'qa_engine': None,
         'search_performed': False,
         'current_step': 0,
         'collection_name': None,
@@ -231,8 +220,18 @@ def display_sidebar():
     for i, suggestion in enumerate(suggestions):
         col = suggestion_cols[i % 2]
         if col.button(suggestion, key=f"suggestion_{i}"):
-            st.session_state.search_query = suggestion
+            # Use st.query_params or a different approach to handle the suggestion
+            # Instead of directly setting session state, we'll return a flag
+            st.session_state[f'suggestion_clicked_{i}'] = suggestion
             st.rerun()
+
+    # Check if any suggestion was clicked and update search query
+    for i, suggestion in enumerate(suggestions):
+        if st.session_state.get(f'suggestion_clicked_{i}'):
+            if st.session_state.search_query != suggestion:
+                st.session_state.search_query = suggestion
+            # Clear the flag
+            st.session_state[f'suggestion_clicked_{i}'] = None
 
     # Number of documents
     st.sidebar.subheader("📊 Collection Size")
@@ -248,7 +247,7 @@ def display_sidebar():
     # Category selection
     st.sidebar.subheader("📂 Category Filter")
     categories = {
-        "All Categories": None,
+        "All Categories": 'all',
         "🤖 Artificial Intelligence": "cs.AI",
         "🧠 Machine Learning": "cs.LG",
         "👁️ Computer Vision": "cs.CV",
@@ -272,7 +271,6 @@ def display_sidebar():
     sort_orders = {
         "Relevance": "relevance",
         "Most Recent": "lastUpdatedDate",
-
     }
 
     selected_sort = st.sidebar.selectbox(
@@ -285,15 +283,22 @@ def display_sidebar():
         st.sidebar.subheader("🕐 Recent Searches")
         for i, search in enumerate(st.session_state.search_history[-3:]):
             if st.sidebar.button(f"🔄 {search['query'][:20]}...", key=f"history_{i}"):
-                st.session_state.search_query = search['query']
+                st.session_state[f'history_clicked_{i}'] = search['query']
                 st.rerun()
+
+    # Check if any history item was clicked
+    for i, search in enumerate(st.session_state.search_history[-3:]):
+        if st.session_state.get(f'history_clicked_{i}'):
+            if st.session_state.search_query != st.session_state[f'history_clicked_{i}']:
+                st.session_state.search_query = st.session_state[f'history_clicked_{i}']
+            # Clear the flag
+            st.session_state[f'history_clicked_{i}'] = None
 
     return {
         'query': query,
         'num_docs': num_docs,
         'category': categories[selected_category],
         'sort_order': sort_orders[selected_sort],
-
     }
 
 
@@ -373,10 +378,13 @@ def collect_papers_with_parameter(params: Dict):
             display_progress_step(4, "Building your Research Database", "processing", "Create embeddings")
             collection_name = f"papers_{int(time.time())}"
             doc_processor.build_vectorstore(documents, collection_name)
+            doc_processor.load_vectorstore(collection_name)
             display_progress_step(4, "Build Vector Database", "Completed", "Database is ready :)")
 
-            st.session_state.papers_data = papers_data
+            st.session_state.papers_data = papers_df
             st.session_state.processor = doc_processor
+            st.session_state.qa_engine = QAEngine(llm='genai', doc_processor=DocumentProcessor(),
+                                                  vs_instance_name=collection_name)
             st.session_state.collection_name = collection_name
             st.session_state.vectorstore_ready = True
 
@@ -552,15 +560,33 @@ def main():
 
         with col2:
             if st.button("🆕 New Collection", use_container_width=True, type="secondary"):
-                # Reset session state for new collection
-                keys_to_reset = ['papers_data', 'vectorstore_ready', 'processor', 'collection_name',
-                                 'last_search_params','chat_messages']
+                # Reset session state for new collection (excluding widget-bound keys)
+                keys_to_reset = [
+                    'papers_data', 'vectorstore_ready', 'processor', 'collection_name',
+                    'search_performed', 'current_step', 'collection_in_progress',
+                    'last_search_params', 'chat_messages'
+                    # Note: 'search_query' is excluded because it's bound to a widget
+                ]
                 for key in keys_to_reset:
                     if key in st.session_state:
-                        del st.session_state[key]
+                        if key == 'papers_data':
+                            st.session_state[key] = None
+                        elif key in ['vectorstore_ready', 'search_performed', 'collection_in_progress']:
+                            st.session_state[key] = False
+                        elif key in ['current_step']:
+                            st.session_state[key] = 0
+                        elif key in ['processor', 'collection_name', 'last_search_params']:
+                            st.session_state[key] = None
+                        elif key in ['chat_messages']:
+                            st.session_state[key] = []
+
+                # Show a message to clear the search query manually
+                st.info("💡 Please clear the search query in the sidebar to start fresh!")
                 st.rerun()
 
 
 if __name__ == "__main__":
+    import os
+    setup_logging(log_level=os.getenv('LOG_LEVEL', 'INFO'))
 
     main()
