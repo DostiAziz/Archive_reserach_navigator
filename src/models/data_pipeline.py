@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from typing import List, Dict
 from tqdm import tqdm
 import requests
-from utils.logger_config import get_logger
+from src.utils.logger_config import get_logger
 
 
 logger = get_logger("data_pipeline")
@@ -21,32 +21,34 @@ class DataPipeline:
         set.
 
         Args:
-            query (str): The search query.
-            category (str, optional): The search category. Defaults to "all".
-            max_results (int, optional): The maximum number of results to return. Defaults to 10.
-            sort_by (str, optional): The field to sort by. Defaults to "relevance".
-            sort_order (str, optional): The field to sort by. Defaults to "ascending".
+            :param query: search query
+            :param category: search category
+            :param max_results: maximum number of results to return
+            :param sort_by: sort by
+            :param sort_order: order of sorting
         Returns:
             List[Dict]: List of search results.
         """
+        try:
+            search_query = f'{category}:"{query}"'
+            params = {
+                'search_query': search_query,
+                'start': 0,
+                'max_results': max_results,
+                'sortBy': sort_by,
+                'sortOrder': sort_order,
+            }
+            response = requests.get(self.base_url, params=params)
+            logger.info(f"Search response status: {response.status_code}")
 
-        search_query = f'{category}:"{query}"'
+            if response.status_code != requests.codes.ok:
+                logger.error(f"Search query failed with status code: {response.status_code}")
+                raise Exception(f"Search query failed with status code: {response.status_code}")
 
-        params = {
-            'search_query': search_query,
-            'start': 0,
-            'max_results': max_results,
-            'sortBy': sort_by,
-            'sortOrder': sort_order,
-        }
-        response = requests.get(self.base_url, params=params)
-        logger.info(f"Search response status: {response.status_code}")
-
-        if response.status_code != requests.codes.ok:
-            logger.error(f"Search query failed with status code: {response.status_code}")
-            raise Exception(f"Search query failed with status code: {response.status_code}")
-
-        return self._parse_arxiv_response(response.text)
+            return self._parse_arxiv_response(response.text)
+        except Exception as e:
+            logger.error(f"Search query failed with exception: {e}")
+            raise Exception(f"Search query failed with exception: {e}")
 
     def _parse_arxiv_response(self, xml_content: str) -> List[Dict]:
         """
@@ -65,7 +67,6 @@ class DataPipeline:
             papers = []
 
             for entry in tqdm(root.findall('atom:entry', ns), desc="Retrieving papers"):
-
                 paper = {
                     'title': entry.find('atom:title', ns).text.strip(),
                     'abstract': entry.find('atom:summary', ns).text.strip().replace('\n', ' '),
@@ -73,7 +74,6 @@ class DataPipeline:
                     'published': entry.find('atom:published', ns).text.strip(),
                     'updated': entry.find('atom:updated', ns).text.strip(),
                 }
-
                 authors = []
                 for author in entry.findall('atom:author', ns):
                     name = author.find('atom:name', ns).text.strip()
@@ -93,9 +93,31 @@ class DataPipeline:
             logger.error(f"Error parsing xml response: {e}")
             raise e
 
+    def list_of_queries(self, query: str, category: str = "all", max_results: int = 10, sort_by: str = "relevance",
+                        sort_order: str = "descending") -> List[Dict]:
+        """Process list of queries which seperated by, for retrieving papers from api
+        Args:
+            :param query: search queries separated by ,
+            :param category: search category
+            :param max_results: maximum number of results to return
+            :param sort_by: sort by
+            :param sort_order: order of sorting
+        Returns:
+            List[Dict]: List of search results.
+        """
+        try:
+            list_of_results = []
+            for query in query.split(','):
+                list_of_results.extend(self.search_paper(query, category, max_results, sort_by, sort_order))
+            return list_of_results
+        except Exception as e:
+            logger.error(f"Error parsing xml response: {e}")
+            raise e
 
-# if __name__ == "__main__":
-#     pipeline = DataPipeline()
-#     results = pipeline.search_paper(query="RAG", max_results=200)
-#     for result in results:
-#         print(result)
+
+if __name__ == "__main__":
+    pipeline = DataPipeline()
+    results = pipeline.list_of_queries(query="RAG, graph rag", max_results=200)
+    print(len(results))
+    for result in results:
+        print(result)
