@@ -173,3 +173,11 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /.cadence
+
+# remove some files from remote repositories
+/src/streamlit_app.py
+/src/pages/*
+/src/pages
+
+
+Dockerfile
