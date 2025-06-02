@@ -277,3 +277,12 @@ def display_sidebar():
         "Sort Results By",
         options=list(sort_orders.keys())
     )
+
+    return {
+        'collection_name': collection_name,
+        'query': query,
+        'num_docs': num_docs,
+        'category': categories[selected_category],
+        'sort_order': sort_orders[selected_sort],
+    }
+
