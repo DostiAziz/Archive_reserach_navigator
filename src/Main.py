@@ -232,3 +232,36 @@ def display_sidebar():
                 st.session_state.search_query = suggestion
             # Clear the flag
             st.session_state[f'suggestion_clicked_{i}'] = None
+
+    # Number of documents
+    st.sidebar.subheader("📊 Collection Size")
+    num_docs = st.sidebar.slider(
+        "Number of Papers",
+        min_value=10,
+        max_value=1000,
+        value=50,
+        step=10,
+        help="More papers = better knowledge base but slower processing"
+    )
+
+    # Category selection
+    st.sidebar.subheader("📂 Category Filter")
+    categories = {
+        "All Categories": 'all',
+        "🤖 Artificial Intelligence": "cs.AI",
+        "🧠 Machine Learning": "cs.LG",
+        "👁️ Computer Vision": "cs.CV",
+        "💬 Natural Language Processing": "cs.CL",
+        "🧬 Neural Networks": "cs.NE",
+        "📊 Statistics - ML": "stat.ML",
+        "🔢 Mathematics": "math.ST",
+        "🏗️ Software Engineering": "cs.SE",
+        "🔐 Cryptography": "cs.CR",
+        "🌐 Human-Computer Interaction": "cs.HC"
+    }
+
+    selected_category = st.sidebar.selectbox(
+        "Select Category",
+        options=list(categories.keys()),
+        help="Filter papers by arXiv category"
+    )
