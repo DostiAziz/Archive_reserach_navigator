@@ -176,8 +176,8 @@ cython_debug/
 
 # remove some files from remote repositories
 src/streamlit_app.py
-src/pages/*
-src/pages
+src/pages/analytics.py
+
 
 data/*
 Dockerfile
