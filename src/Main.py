@@ -401,3 +401,98 @@ def collect_papers_with_parameter(params: Dict):
         except Exception as e:
             st.error(f"❌ Error during collection: {str(e)}")
             return None
+
+
+def display_navigation_cards():
+    """Display navigation cards to other pages when data collection was successful"""
+
+    st.subheader(" Navigate to other pages")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        <div class="feature-card">
+            <h3> Analytics Dashboard</h3>
+            <p>Expolore visual analytics of your collected papers including:</p>
+            <ul>
+                <li> Category distribution</li>
+                <li> Publication timelines</li>
+                <li> Author networks</li>
+                <li> Search and filter tools</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("Explore visual analytics", key="nav_analytics", use_container_width=True):
+            try:
+                st.switch_page("pages/analytics.py")
+            except Exception as e:
+                st.info("An error occurred while nagivating to other pages")
+
+    with col2:
+        st.markdown("""
+                <div class="feature-card">
+                    <h3>💬 Research Chat</h3>
+                    <p>Interactive Q&A with your research collection:</p>
+                    <ul>
+                        <li>🤖 AI-powered responses</li>
+                        <li>📚 Source citations</li>
+                        <li>💡 Smart suggestions</li>
+                        <li>🔍 Semantic search</li>
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
+        chat_disabled = not st.session_state.vectorstore_ready
+        if st.button("💬 Start Chatting", key="nav_chat", use_container_width=True, disabled=chat_disabled):
+            try:
+                st.switch_page("pages/chat.py")
+            except:
+                st.info("💬 Error while nagivating to Chat page ")
+
+        if chat_disabled:
+            st.caption("⚠️ Collect papers first to enable chat")
+
+
+def display_quick_stats():
+    """Display quick statistics if data is available"""
+    if st.session_state.papers_data is not None:
+        papers_data = st.session_state.papers_data
+
+        st.markdown("### 📋 Collection Overview")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric("📄 Papers", len(papers_data))
+
+        with col2:
+            # Extract all authors from all papers
+            all_authors = []
+            for authors_str in papers_data['authors']:
+                if pd.notna(authors_str):
+                    # Split by comma and clean up whitespace
+                    authors = [author.strip() for author in str(authors_str).split(',')]
+                    all_authors.extend(authors)
+
+            # Count unique authors
+            unique_authors = len(set(all_authors))
+            st.metric("👥 Authors", unique_authors)
+
+        with col3:
+            # Count unique categories (simplified)
+            categories = set()
+            for categories_str in papers_data['categories']:
+                if pd.notna(categories_str) and categories_str:
+                    # Split by comma
+                    cats = [cat.strip() for cat in str(categories_str).split(',')]
+                    categories.update(cats)
+
+            st.metric("📂 Categories", len(categories))
+
+        with col4:
+            if st.session_state.last_search_params:
+                query = st.session_state.last_search_params['query']
+                st.metric("🔍 Query", f"'{query[:15]}...'" if len(query) > 15 else f"'{query}'")
+
+
