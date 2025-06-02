@@ -299,7 +299,7 @@ def display_progress_step(step_num: int, title: str, status: str, details: str):
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col1:
-        if status == 'completed':
+        if status == 'Completed':
             st.success("✅")
         elif status == 'processing':
             st.warning("⏳")
@@ -314,7 +314,7 @@ def display_progress_step(step_num: int, title: str, status: str, details: str):
             st.caption(details)
 
     with col3:
-        if status == 'completed':
+        if status == 'Completed':
             st.markdown("**Completed**")
         elif status == "processing":
             st.markdown("**Processing...**")
@@ -615,6 +615,9 @@ def main():
     else:
         # Data collection is completed, now show the status and navigation
         st.markdown("---")
+        display_quick_stats()
+
+        st.markdown("---")
         display_navigation_cards()
 
         st.markdown("---")
@@ -630,10 +633,8 @@ def main():
 
         with col2:
             if st.button("🆕 New Collection", use_container_width=True, type="secondary"):
-                # Reset session state for new collection
+                # Reset session state for a new collection
                 reset_session_data()
-
-                # Don't reset search_history - users might want to keep it
                 st.rerun()
 
 
