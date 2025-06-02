@@ -134,3 +134,60 @@ def initialize_session_state():
         if key not in st.session_state:
             st.session_state[key] = value
 
+
+def display_header():
+    """Display the main application header"""
+    st.markdown('<h1 class="main-header">Your AI Research Paper Navigator</h1>', unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; margin: 1rem 0;">
+            <h4 style="color: #333; margin: 0;">Discover and explore research papers in Archive</h4>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Powered by LangChain, ChromaDB, and Streamlit</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+def display_system_status():
+    """Display current system status"""
+    st.markdown("-----------")
+    st.subheader("📊 System Status")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        papers_count = len(st.session_state.papers_data) if st.session_state.papers_data is not None else 0
+        status_class = "status-ready" if papers_count > 0 else "status-pending"
+
+        st.markdown(f"""
+        <div class="status-card {status_class}">
+            <h4>📄 Collected papers</h4>
+            <h2>{papers_count}</h2>
+            <p>{'✅ Ready' if papers_count > 0 else '⏳ No papers collected'}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        vector_status = "✅ Ready" if st.session_state.vectorstore_ready else "❌ Not Ready"
+        status_class = "status-ready" if st.session_state.vectorstore_ready else "status-pending"
+
+        st.markdown(f"""
+        <div class="status-card {status_class}">
+            <h4>🧠 Vector Database</h4>
+            <h3>{vector_status}</h3>
+            <p>{'Search enabled' if st.session_state.vectorstore_ready else 'Collect papers'}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        chat_status = "✅ Available" if st.session_state.vectorstore_ready else "⏳ Pending"
+        status_class = "status-ready" if st.session_state.vectorstore_ready else "status-pending"
+
+        st.markdown(f"""
+        <div class="status-card {status_class}">
+            <h4>💬 Chat Interface</h4>
+            <h3>{chat_status}</h3>
+            <p>{'Ready to chat' if st.session_state.vectorstore_ready else 'Collection required'}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
