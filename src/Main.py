@@ -265,3 +265,15 @@ def display_sidebar():
         options=list(categories.keys()),
         help="Filter papers by arXiv category"
     )
+
+    # Sort order
+    st.sidebar.subheader("📊 Sort Order")
+    sort_orders = {
+        "Relevance": "relevance",
+        "Most Recent": "lastUpdatedDate",
+    }
+
+    selected_sort = st.sidebar.selectbox(
+        "Sort Results By",
+        options=list(sort_orders.keys())
+    )
