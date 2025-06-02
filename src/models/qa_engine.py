@@ -87,7 +87,7 @@ class QAEngine():
         """
         try:
             if model_id == 'genai':
-                self._setup_gemini_llm(model_name="Gemini 2.0 Flash-Lite")
+                self._setup_gemini_llm(model_name="gemini-2.0-flash")
             elif model_id == 'openai':
                 self._setup_openai_llm()
             elif model_id == 'huggingface':
