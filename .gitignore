@@ -175,9 +175,9 @@ cython_debug/
 /.cadence
 
 # remove some files from remote repositories
-/src/streamlit_app.py
-/src/pages/*
-/src/pages
+src/streamlit_app.py
+src/pages/*
+src/pages
 
-/data
+data/
 Dockerfile
