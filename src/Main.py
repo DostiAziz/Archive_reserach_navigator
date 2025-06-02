@@ -124,10 +124,11 @@ def initialize_session_state():
         'search_performed': False,
         'current_step': 0,
         'collection_name': None,
+        'collection_name_input': ' ',
         'search_history': [],
         'last_search_params': None,
         'collection_in_progress': False,
-        'chat_messages': []
+        'search_query': ' '
     }
 
     for key, value in defaults.items():
@@ -202,12 +203,12 @@ def display_sidebar():
     collection_name = st.sidebar.text_input("Collection Name",
                                             placeholder="Enter a collection name",
                                             help="Name that is used for your collected papers",
-                                            key="collection_name", required=True)
+                                            value=st.session_state.collection_name)
     query = st.sidebar.text_input(
         "Research Query, for multi query separate them by **,** ",
         placeholder="e.g., machine learning, transformers, computer vision",
         help="Enter keywords or topics you want to research",
-        key="search_query", required=True
+        key="search_query"
     )
 
     # Quick suggestion buttons
@@ -369,9 +370,9 @@ def collect_papers_with_parameter(params: Dict):
             time.sleep(2.0)
 
             # step 4 build vector databases
+            collection_name = params['collection_name']
             display_progress_step(3, "Building your Research Database", "processing", "Create embeddings")
-            collection_name = f"papers_{int(time.time())}"
-            doc_processor.build_vectorstore(documents, collection_name)
+            doc_processor.build_vectorstore(documents, collection_name=collection_name)
             doc_processor.load_vectorstore(collection_name)
             display_progress_step(3, "Build Vector Database", "Completed", "Database is ready :)")
 
@@ -383,6 +384,7 @@ def collect_papers_with_parameter(params: Dict):
             st.session_state.qa_engine = QAEngine(llm='genai', doc_processor=doc_processor,
                                                   vs_instance_name=collection_name)
             st.session_state.collection_name = collection_name
+            st.session_state.collection_name_input = collection_name
             st.session_state.vectorstore_ready = True
 
             # Add to search history
@@ -414,7 +416,7 @@ def display_navigation_cards():
         st.markdown("""
         <div class="feature-card">
             <h3> Analytics Dashboard</h3>
-            <p>Expolore visual analytics of your collected papers including:</p>
+            <p>Explore visual analytics of your collected papers including:</p>
             <ul>
                 <li> Category distribution</li>
                 <li> Publication timelines</li>
@@ -447,8 +449,8 @@ def display_navigation_cards():
         if st.button("💬 Start Chatting", key="nav_chat", use_container_width=True, disabled=chat_disabled):
             try:
                 st.switch_page("pages/chat.py")
-            except:
-                st.info("💬 Error while nagivating to Chat page ")
+            except Exception as e:
+                st.info(f"💬 Error while nagivating to Chat page {e}")
 
         if chat_disabled:
             st.caption("⚠️ Collect papers first to enable chat")
@@ -496,3 +498,145 @@ def display_quick_stats():
                 st.metric("🔍 Query", f"'{query[:15]}...'" if len(query) > 15 else f"'{query}'")
 
 
+def reset_session_data():
+    """Reset session data"""
+
+    reset_values = {
+        'papers_data': None,
+        'vectorstore_ready': False,
+        'doc_processor': None,
+        'qa_engine': None,
+        'collection_name': None,
+        'search_performed': False,
+        'current_step': 0,
+        'collection_in_progress': False,
+        'last_search_params': None,
+        'chat_messages': [],
+        'collection_name_input': "",
+        'messages': []
+    }
+
+    # Reset each key to its default value
+    for key, default_value in reset_values.items():
+        if key in st.session_state:
+            st.session_state[key] = default_value
+
+
+def main():
+    """Method to set up the whole interface"""
+
+    # Initialize session state
+    initialize_session_state()
+
+    # Build the header part of the page
+    display_header()
+
+    # Display system status
+    display_system_status()
+
+    # get sidebar parameters
+    params = display_sidebar()
+
+    if not params:
+        st.error("❌ Cannot proceed without required modules. Please check your installation.")
+        return
+
+    if st.session_state.papers_data is None:
+        # First time user, show welcome and how the app can be used
+        st.markdown("---")
+        st.subheader("Get Started with Your AI Research Journey")
+
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            st.markdown("""
+            **Welcome to Your AI Research Navigator!**
+            
+            Transform how you discover and explore academic papers:
+            
+            **📋 Step-by-step process:**
+            1. **Enter your search query** in the slidebar (e.g., Machine learning, Computer Vision, etc.)
+             For multi query, separate query by **,**(e.g. RAG, agent)
+            2. 📂 **Select relevant categories** to focus your search  
+            3. 📊 **Choose collection size** (start with 30-50 papers)
+            4. 🚀 **Click "Start Collection"** below to begin
+
+            **🔄 What happens next:**
+            - We'll search arXiv for relevant papers
+            - Process and analyze the content  
+            - Build an AI-powered search database
+            - Enable chat and analytics features
+            """
+                        )
+
+        with col2:
+            st.info("""
+            **💡Tips:**
+
+            **🎯 Search Strategy:**
+            - Use specific keywords
+            - Start with smaller collections (30-50 papers)
+
+            **⚡ Performance:**
+            - Fewer papers = faster processing
+            - More papers = richer knowledge base
+
+            **🔍 Examples:**
+            - "transformer architecture"
+            - "computer vision, deep learning"
+            - "natural language processing"
+            """)
+
+        # Collection button
+        st.markdown("---")
+
+        if params['query'].strip():
+            col1, col2, col3 = st.columns([1, 2, 1])
+
+            with col2:
+                if st.button("Start paper collection",
+                             type="primary",
+                             use_container_width=True,
+                             disabled=st.session_state.collection_in_progress):
+                    if st.session_state.collection_in_progress:
+                        st.warning("⏳ Collection already started")
+                    else:
+                        with st.spinner("🔄 Initializing collection process..."):
+                            result = collect_papers_with_parameter(params)
+
+                        if result is not None:
+                            time.sleep(2)
+                            st.rerun()
+
+            if st.session_state.collection_in_progress:
+                st.caption("Collection is progress... Please wait.")
+        else:
+            st.warning("Please enter a search query in the sidebar to begin collecting.")
+    else:
+        # Data collection is completed, now show the status and navigation
+        st.markdown("---")
+        display_navigation_cards()
+
+        st.markdown("---")
+        st.subheader("Start Fresh or Expand collection")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown("""
+                   **Ready for a new research topic?** 
+
+                   Start a new collection to explore different papers, or modify your search parameters 
+                   to discover related research in your field.
+                   """)
+
+        with col2:
+            if st.button("🆕 New Collection", use_container_width=True, type="secondary"):
+                # Reset session state for new collection
+                reset_session_data()
+
+                # Don't reset search_history - users might want to keep it
+                st.rerun()
+
+
+if __name__ == '__main__':
+    setup_logging()
+    main()
