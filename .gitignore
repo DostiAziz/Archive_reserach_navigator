@@ -179,5 +179,5 @@ src/streamlit_app.py
 src/pages/*
 src/pages
 
-data/
+data/*
 Dockerfile
