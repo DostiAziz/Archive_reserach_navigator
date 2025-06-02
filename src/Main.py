@@ -321,3 +321,83 @@ def display_progress_step(step_num: int, title: str, status: str, details: str):
             st.markdown("**Error**")
         else:
             st.markdown("Pending")
+
+
+def collect_papers_with_parameter(params: Dict):
+    """Using the submitted parameter for collecting papers
+    Args:
+        :params (Dict): A dictionary containing all the submitted parameters
+
+    """
+    st.subheader("📚 Building Your Research Database Using collected papers")
+
+    # progress tracking
+    progress_container = st.container()
+    with progress_container:
+        try:
+            # Step 1: Initialize connection with Archive endpoint and perform search using query parameter
+            display_progress_step(1, "Initialize connection with Archive endpoint", "processing", "Setting up..")
+            loader = DataPipeline()
+            # check if the query parameter contains ,
+            if ',' in params['query']:
+                papers_data = loader.list_of_queries(params['query'], category=params["category"],
+                                                     max_results=params["num_docs"],
+                                                     sort_by=params["sort_order"])
+            else:
+                papers_data = loader.search_paper(query=params["query"],
+                                                  category=params["category"],
+                                                  max_results=params["num_docs"],
+                                                  sort_by=params["sort_order"]
+                                                  )
+
+            if not papers_data:
+                display_progress_step(1, "Search papers", "Error", "No papers found")
+                st.error("❌ No papers found. Try different keywords.")
+                return None
+            # Step 1: Show confirmation indicator
+            display_progress_step(1, "Search papers", "Completed", f"Found {len(papers_data)} papers")
+            time.sleep(2.0)
+
+            # step 2: process documents
+            display_progress_step(2, "Processing papers", "processing", "Converting to required format")
+            papers_df = pd.DataFrame(data=papers_data)
+            doc_processor = DocumentProcessor()
+            documents = doc_processor.prepare_documents(papers_df)
+            # uncomment this line if you want to chunk the documents
+            # document_chunks = doc_processor.chunk_documents(documents)
+            display_progress_step(2, "Processing papers", "Completed", f"Created {len(documents)} documents")
+            time.sleep(2.0)
+
+            # step 4 build vector databases
+            display_progress_step(3, "Building your Research Database", "processing", "Create embeddings")
+            collection_name = f"papers_{int(time.time())}"
+            doc_processor.build_vectorstore(documents, collection_name)
+            doc_processor.load_vectorstore(collection_name)
+            display_progress_step(3, "Build Vector Database", "Completed", "Database is ready :)")
+
+            st.session_state.papers_data = papers_df
+            st.session_state.processor = doc_processor
+
+            # Initializing chat endpoint
+            display_progress_step(4, "Chat interface", "processing", "Initializing chat interface")
+            st.session_state.qa_engine = QAEngine(llm='genai', doc_processor=doc_processor,
+                                                  vs_instance_name=collection_name)
+            st.session_state.collection_name = collection_name
+            st.session_state.vectorstore_ready = True
+
+            # Add to search history
+            st.session_state.search_history.append({
+                'query': params['query'],
+                'timestamp': datetime.now(),
+                'num_papers': len(papers_data)
+            })
+            display_progress_step(4, "Chat interface", "Completed",
+                                  "Chat interface is ready :), navigate toc chat page to start")
+            time.sleep(1.0)
+            st.success("🎉 Collection completed successfully!")
+            time.sleep(2.0)
+            return papers_df
+
+        except Exception as e:
+            st.error(f"❌ Error during collection: {str(e)}")
+            return None
