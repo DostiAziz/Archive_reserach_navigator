@@ -5,6 +5,7 @@ ENV/
 .venv/
 .env/
 virtualenv/
+venv/*
 
 # Python cache
 __pycache__/
@@ -27,6 +28,10 @@ desktop.ini
 .idea/
 .vscode/
 *.swp
+.cadence
+
+.env
+
 
 # Environment secrets (use environment variables instead)
 .env*
