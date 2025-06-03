@@ -215,25 +215,6 @@ def display_sidebar():
     st.sidebar.markdown("**💡 Quick Suggestions:**")
     suggestion_cols = st.sidebar.columns(2)
 
-    suggestions = [
-        "machine learning, deep learning", "transformers", "computer vision",
-        "NLP", "AI ethics", "RAG"
-    ]
-
-    for i, suggestion in enumerate(suggestions):
-        col = suggestion_cols[i % 2]
-        if col.button(suggestion, key=f"suggestion_{i}"):
-            st.session_state[f'suggestion_clicked_{i}'] = suggestion
-            st.rerun()
-
-    # Check if any suggestion was clicked and update a search query
-    for i, suggestion in enumerate(suggestions):
-        if st.session_state.get(f'suggestion_clicked_{i}'):
-            if st.session_state.search_query != suggestion:
-                st.session_state.search_query = suggestion
-            # Clear the flag
-            st.session_state[f'suggestion_clicked_{i}'] = None
-
     # Number of documents
     st.sidebar.subheader("📊 Collection Size")
     num_docs = st.sidebar.slider(

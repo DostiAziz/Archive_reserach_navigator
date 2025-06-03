@@ -105,6 +105,7 @@ def display_analytics_dashboard(papers_df):
 
     filtered_df = papers_df[['title', 'authors', 'categories', 'published', 'id']]
     filtered_df['published'] = filtered_df['published'].dt.strftime('%Y-%m-%d')
+    filtered_df.sort_values('published', ascending=False, inplace=True)
     filtered_df.rename(columns={'id': 'URL'}, inplace=True)
 
     st.dataframe(filtered_df, use_container_width=True,
