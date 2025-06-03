@@ -176,7 +176,6 @@ cython_debug/
 
 # remove some files from remote repositories
 src/streamlit_app.py
-src/pages/analytics.py
 
 
 data/*
