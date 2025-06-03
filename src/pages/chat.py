@@ -39,7 +39,7 @@ def QA_chat():
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Generate response first
+        # Generate response
         processor = st.session_state.processor
         qa_engine = st.session_state.qa_engine
 

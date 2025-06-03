@@ -1,8 +1,7 @@
-import types
-import torch
-
 import os
 from typing import List, Dict
+
+import torch
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFacePipeline
@@ -71,10 +70,15 @@ class QAEngine():
                 model=self.LOCAL_MODEL_NAME,
                 tokenizer=self.LOCAL_MODEL_NAME,
                 do_sample=True,
-                temperature=self.TEMPERATURE
+                temperature=self.TEMPERATURE,
+                max_new_tokens=1024,
+                device= torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
             )
-            self.llm = HuggingFacePipeline(pipeline=pipe)
+            self.llm = HuggingFacePipeline(pipeline=pipe,
+                                           pipeline_kwargs={"return_full_text": False}
+                                           )
+            self.llm.bind(skip_prompt=True)
             logger.info("Local LLM loaded successfully")
         except Exception as e:
             logger.error(f"Failed to load local LLM: {e}")
@@ -130,17 +134,27 @@ class QAEngine():
                Research Paper Context:
                {context}
                Question: {question}
+               
                Instructions:
                1. Provide a comprehensive answer based on the research papers.
                2. Mention specific papers or authors when relevant, using the source numbers (e.g., [1], [2]).
                3. If the papers don't contain enough information, say so clearly.
                4. Use academic language appropriate for research.
                5. At the end of your generated answer, list the sources you have used as a reference, in this format:
-               References:
-               [1] Title of the paper goes here.
-               [2] Title of another paper.
-               Only cite papers that are directly relevant to the answer.
-               Answer:
+              
+              References:
+                
+                [1] Title of first paper
+                
+                [2] Title of second paper
+                
+                [3] Title of third paper
+
+                Only cite papers that are directly relevant to the answer. 
+               
+                Make sure each reference is on its own line with proper spacing.
+
+        
                """
         return PromptTemplate(
             template=template,
@@ -150,7 +164,7 @@ class QAEngine():
     def generate_answer(self, query: str) -> str:
         """Generate an answer using RAG approach
         Args:
-            query (str): query to search for
+            :param query: query to search for
         Returns:
             :param query: The question for llm to answer
         """
