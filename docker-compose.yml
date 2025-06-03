@@ -4,7 +4,7 @@ services:
   app:
    build: .
    ports:
-     - "8000:8000"
+     - "8501:8501"
    environment:
     # Pass the environment variables here
     - GEMINI_API_KEY=${GEMINI_API_KEY}
