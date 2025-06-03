@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from streamlit import columns
 
 st.set_page_config(
     page_title="Analytics Dashboard",
@@ -36,6 +37,7 @@ def display_analytics_dashboard(papers_df):
         )
 
     with col2:
+        # Method 1: Using set to get unique authors
         unique_authors = len(set([author.strip() for authors in papers_df['authors']
                                   for author in authors.split(',')]))
         st.metric(
@@ -71,7 +73,7 @@ def display_analytics_dashboard(papers_df):
         for cats in papers_df['categories']:
             category_data.extend([cat.strip() for cat in cats.split(',')])
 
-        category_counts = pd.Series(set(category_data)).value_counts().head(10)
+        category_counts = pd.Series(category_data).value_counts().head(10)
 
         fig = px.bar(
             x=category_counts.values,
@@ -92,7 +94,8 @@ def display_analytics_dashboard(papers_df):
             x=yearly_counts.index,
             y=yearly_counts.values,
             title="Papers by Publication Year",
-            labels={'x': 'Year', 'y': 'Number of Papers'}
+            labels={'x': 'Year', 'y': 'Number of Papers'},
+            markers=True
         )
         fig.update_layout(height=400)
         st.plotly_chart(fig, use_container_width=True)
@@ -100,7 +103,13 @@ def display_analytics_dashboard(papers_df):
     # Detailed tables
     st.subheader("📋 Paper Details")
 
+    filtered_df = papers_df[['title', 'authors', 'categories', 'published', 'id']]
+    filtered_df['published'] = filtered_df['published'].dt.strftime('%Y-%m-%d')
+    filtered_df.rename(columns={'id': 'URL'}, inplace=True)
 
+    st.dataframe(filtered_df, use_container_width=True,
+                 height=400,
+                 column_config={"URL": st.column_config.LinkColumn("Paper", display_text="View Paper")})
 
 
 # Run the analytics dashboard
