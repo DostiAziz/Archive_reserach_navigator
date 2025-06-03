@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+from config import Config
+
 
 def setup_logging(log_level: str = "INFO"):
     """Setup logging configuration
@@ -13,7 +15,7 @@ def setup_logging(log_level: str = "INFO"):
     if isinstance(log_level, str):
         log_level = getattr(logging, log_level.upper())
 
-    log_dir = Path("../logs")
+    log_dir = Path(Config.LOG_DIR)
     log_dir.mkdir(parents=True, exist_ok=True)
     (log_dir / "app").mkdir(exist_ok=True)
     (log_dir / "errors").mkdir(exist_ok=True)
@@ -26,7 +28,7 @@ def setup_logging(log_level: str = "INFO"):
     console_handler = logging.StreamHandler(sys.stdout)
     file_handler = logging.FileHandler(log_dir / f"app/app_{today}.log")
 
-    error_handler = logging.FileHandler(log_dir / f"app/errors_{today}.log")
+    error_handler = logging.FileHandler(log_dir / f"errors/errors_{today}.log")
     error_handler.setLevel(logging.ERROR)
 
     logging.basicConfig(

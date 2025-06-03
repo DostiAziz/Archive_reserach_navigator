@@ -115,9 +115,9 @@ class DataPipeline:
             raise e
 
 
-if __name__ == "__main__":
-    pipeline = DataPipeline()
-    results = pipeline.list_of_queries(query="RAG, graph rag", max_results=200)
-    print(len(results))
-    for result in results:
-        print(result)
+# if __name__ == "__main__":
+#     pipeline = DataPipeline()
+#     results = pipeline.list_of_queries(query="RAG, graph rag", max_results=200)
+#     print(len(results))
+#     for result in results:
+#         print(result)
