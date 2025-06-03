@@ -60,5 +60,48 @@ def display_analytics_dashboard(papers_df):
             delta=f"{recent_papers / len(papers_df) * 100:.1f}% recent"
         )
 
+    st.markdown("---")
+
+    # Visualizations, barchart and linechart
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("📈 Papers by Category")
+        category_data = []
+        for cats in papers_df['categories']:
+            category_data.extend([cat.strip() for cat in cats.split(',')])
+
+        category_counts = pd.Series(set(category_data)).value_counts().head(10)
+
+        fig = px.bar(
+            x=category_counts.values,
+            y=category_counts.index,
+            orientation='h',
+            title="Top 10 Categories",
+            labels={'x': 'Number of Papers', 'y': 'Category'}
+        )
+        fig.update_layout(height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        st.subheader("📅 Publication Timeline")
+        papers_df['year'] = papers_df['published'].dt.year
+        yearly_counts = papers_df['year'].value_counts().sort_index()
+
+        fig = px.line(
+            x=yearly_counts.index,
+            y=yearly_counts.values,
+            title="Papers by Publication Year",
+            labels={'x': 'Year', 'y': 'Number of Papers'}
+        )
+        fig.update_layout(height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Detailed tables
+    st.subheader("📋 Paper Details")
+
+
+
+
 # Run the analytics dashboard
 display_analytics_dashboard(papers_df)
