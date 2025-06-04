@@ -27,7 +27,6 @@ def setup_logging(log_level: str = "INFO"):
 
     console_handler = logging.StreamHandler(sys.stdout)
     file_handler = logging.FileHandler(log_dir / f"app/app_{today}.log")
-
     error_handler = logging.FileHandler(log_dir / f"errors/errors_{today}.log")
     error_handler.setLevel(logging.ERROR)
 
