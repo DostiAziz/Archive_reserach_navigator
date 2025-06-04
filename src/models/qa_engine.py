@@ -1,6 +1,5 @@
 import os
 from typing import List, Dict
-
 import torch
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -18,6 +17,8 @@ logger = get_logger("qa_engine")
 
 
 class QAEngine():
+    """Class for QA engine """
+
     # Constants
     DEFAULT_SEARCH_RESULTS = 5
     LOCAL_MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
@@ -32,13 +33,16 @@ class QAEngine():
         self.emb_engine = doc_processor
         self.llm = None
         self.qa_chain = None
+
+        # Initialize llm
         self._initialize_llm(llm)
+        # Load vector database
         self.emb_engine.load_vectorstore(collection_name=vs_instance_name)
 
-    def _setup_gemini_llm(self, model_name):
+    def _setup_gemini_llm(self, model_name = 'gemini-2.0-flash'):
         """Setup google gemini llm
         Args
-         :param model_name: google gemini llm name
+         model_name (str): model name default gemini-2.0-flash
         """
         gemini_api_key = os.getenv("GEMINI_API_KEY")
 
@@ -52,7 +56,7 @@ class QAEngine():
     def _setup_openai_llm(self, model_name: str = "gpt-3.5-turbo"):
         """Setup openai
         Args
-        :param model_name: openai llm name
+            model_name (str): Defaults to "gpt-3.5-turbo".
         """
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:
@@ -71,13 +75,13 @@ class QAEngine():
                 tokenizer=self.LOCAL_MODEL_NAME,
                 do_sample=True,
                 temperature=self.TEMPERATURE,
-                max_new_tokens=1024,
                 device= torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
             )
             self.llm = HuggingFacePipeline(pipeline=pipe,
                                            pipeline_kwargs={"return_full_text": False}
                                            )
+            # Skip printing the prompt
             self.llm.bind(skip_prompt=True)
             logger.info("Local LLM loaded successfully")
         except Exception as e:
@@ -88,6 +92,8 @@ class QAEngine():
         """Initialize the language model
         Args:
             model_id: str the name of the language model
+        Returns:
+            None
         """
         try:
             if model_id == 'genai':
@@ -103,13 +109,20 @@ class QAEngine():
     def perform_vectorstore_search(self, query: str, k: int = 5) -> List[Dict]:
         """Retrieve similar content from vector store
         Args:
-            query (str): query to search for
+            query (str): query to search for in vector store
             k (int): number of results to return
         """
 
         return self.emb_engine.query_vectorstore(query=query, k=k)
 
     def format_context(self, retrieved_results: List[Dict]) -> str:
+        """Format the retrieved results to separate context from the references
+        Args:
+            retrieved_results (List[Dict]): list of retrieved results
+        Returns:
+            str: formatted context
+        """
+
         content = ""
         sources = ""
         try:
@@ -126,7 +139,10 @@ class QAEngine():
             raise
 
     def prompt_template(self) -> PromptTemplate:
-        """Create the RAG prompt template"""
+        """Create the RAG prompt template
+        Returns:
+            PromptTemplate: RAG prompt template
+        """
         template = """You are an AI research assistant analyzing academic papers. Use the following research paper
                excerpts to answer the question. Be accurate, cite specific papers when possible, and acknowledge when
                information is not available.
@@ -164,9 +180,9 @@ class QAEngine():
     def generate_answer(self, query: str) -> str:
         """Generate an answer using RAG approach
         Args:
-            :param query: query to search for
+            query: query to search for
         Returns:
-            :param query: The question for llm to answer
+            str: generated answer
         """
         try:
             # Get context from vector search

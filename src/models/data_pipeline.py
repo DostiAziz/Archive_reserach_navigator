@@ -30,7 +30,7 @@ class DataPipeline:
             List[Dict]: List of search results.
         """
         try:
-            search_query = f'{category}:"{query}"'
+            search_query = f'{category}:{query}'
             params = {
                 'search_query': search_query,
                 'start': 0,
@@ -38,6 +38,7 @@ class DataPipeline:
                 'sortBy': sort_by,
                 'sortOrder': sort_order,
             }
+            print(f'the search query is {search_query}')
             response = requests.get(self.base_url, params=params)
             logger.info(f"Search response status: {response.status_code}")
 

@@ -19,12 +19,16 @@ class DocumentProcessor:
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
         device = "cuda" if torch.cuda.is_available() else "cpu"
         logger.info(f"Using device: {device}")
+
+        # Embedding model for creating vector database
         self.embedding_model = HuggingFaceEmbeddings(model_name=embedding_model,
                                                      model_kwargs={'device': device},
                                                      encode_kwargs={'normalize_embeddings': True}
                                                      )
         self.persistent_directory = Config.VECTOR_STORE_DIR
         os.makedirs(self.persistent_directory, exist_ok=True)
+
+        # Chunking of retreived documents
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=Config.CHUNK_SIZE,
                                                             chunk_overlap=Config.OVERLAP,
                                                             length_function=len)
@@ -35,7 +39,7 @@ class DocumentProcessor:
     def prepare_documents(self, paper_df: pd.DataFrame) -> List[Document]:
         """Convert dataframe containng retrieved paper information for langchain documents
         Args:
-            paper_df: paper dataframe
+            paper_df (pd.DataFrame): paper dataframe
         Returns:
             List[Document] list containing paper documents in langchain format
         """
@@ -55,6 +59,7 @@ class DocumentProcessor:
                     'authors': paper.authors,
                     'categories': paper.categories,
                     'published': paper.published,
+
                 }
                 doc = Document(page_content=content, metadata=metadata)
                 documents.append(doc)
@@ -88,16 +93,15 @@ class DocumentProcessor:
         Returns:
             None
         """
-
         try:
             try:
                 import chromadb
                 # retrieve database instance and delete it if exists
                 client = chromadb.PersistentClient(path=self.persistent_directory)
                 client.delete_collection(name=collection_name)
-                logger.info(f'Successfully deleted {collection_name} vectorstore')
+                logger.info(f'Successfully deleted old {collection_name} vectorstore')
             except Exception as e:
-                logger.error(f'failed to create {collection_name} vectorstore: {e}')
+                logger.error(f'failed to delete old instances of {collection_name} vectorstore: {e}')
 
             logger.info(f'Building {collection_name} vectorstore')
 
@@ -152,8 +156,8 @@ class DocumentProcessor:
 
             # sort returned results from most similar to less
             query_results = sorted(query_results, key=lambda x: x[1], reverse=True)
-            formatted_results = []
 
+            formatted_results = []
             for index, (doc, score) in enumerate(query_results):
                 result = {'rank': index + 1,
                           'similarity_score': score,
@@ -163,6 +167,7 @@ class DocumentProcessor:
                 formatted_results.append(result)
 
             logger.info(f'Query {query} returned {len(query_results)} relevant papers')
+
             return formatted_results
 
         except Exception as e:
