@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-from streamlit import columns
 
 st.set_page_config(
     page_title="Analytics Dashboard",
@@ -19,12 +17,16 @@ if st.session_state.get('papers_data') is None:
         st.switch_page("Main.py")
     st.stop()
 
+# get created dataframe from session variable
 papers_df = st.session_state.papers_data
 
 
 # Analytics content
 def display_analytics_dashboard(papers_df):
-    """Display comprehensive analytics dashboard"""
+    """Display comprehensive analytics dashboard
+    Args:
+        papers_df (pd.DataFrame): contains papers data
+    """
 
     # Key Metrics Row
     col1, col2, col3, col4 = st.columns(4)
@@ -105,8 +107,8 @@ def display_analytics_dashboard(papers_df):
 
     filtered_df = papers_df[['title', 'authors', 'categories', 'published', 'id']]
     filtered_df['published'] = filtered_df['published'].dt.strftime('%Y-%m-%d')
-    filtered_df.sort_values('published', ascending=False, inplace=True)
-    filtered_df.rename(columns={'id': 'URL'}, inplace=True)
+    filtered_df = filtered_df.sort_values('published', ascending=False)
+    filtered_df = filtered_df.rename(columns={'id': 'URL'})
 
     st.dataframe(filtered_df, use_container_width=True,
                  height=400,
