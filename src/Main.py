@@ -16,7 +16,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
 st.markdown("""
 <style>
     .main-header {
@@ -60,49 +59,7 @@ st.markdown("""
         font-weight: bold;
     }
 
-    .paper-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        transition: box-shadow 0.3s ease;
-    }
 
-    .paper-card:hover {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .paper-title {
-        font-weight: bold;
-        color: #1f77b4;
-        margin-bottom: 0.5rem;
-        font-size: 1.1rem;
-    }
-
-    .paper-meta {
-        font-size: 0.9rem;
-        color: #666;
-        margin-bottom: 0.5rem;
-    }
-
-    .similarity-score {
-        background-color: #e7f3ff;
-        padding: 0.3rem 0.6rem;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        display: inline-block;
-    }
-
-    .metric-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        text-align: center;
-    }
 
     .progress-text {
         font-size: 0.9rem;
@@ -575,22 +532,29 @@ def main():
             col1, col2, col3 = st.columns([1, 2, 1])
 
             with col2:
-                if st.button("Start paper collection",
-                             type="primary",
-                             use_container_width=True,
-                             disabled=st.session_state.collection_in_progress):
-                    if st.session_state.collection_in_progress:
-                        st.warning("⏳ Collection already started")
-                    else:
-                        with st.spinner("🔄 Initializing collection process..."):
-                            result = collect_papers_with_parameter(params)
+                if not st.session_state.collection_in_progress:
+                    if st.button("Start paper collection",
+                                 type="primary",
+                                 use_container_width=True,
+                                 disabled=False):
+                        st.session_state.collection_in_progress = True
+                        st.rerun()
 
+                else:
+                    # Show disabled button when in progress
+                    st.button("🔄 Collection in Progress...",
+                              type="secondary",
+                              use_container_width=True,
+                              disabled=True)
+                if st.session_state.collection_in_progress:
+                    with st.spinner("🔄 Initializing collection process..."):
+                        result = collect_papers_with_parameter(params)
                         if result is not None:
                             time.sleep(2)
                             st.rerun()
+                        else:
+                            st.error("❌ Collection process failed.")
 
-            if st.session_state.collection_in_progress:
-                st.caption("Collection is progress... Please wait.")
         else:
             st.warning("Please enter a search query in the sidebar to begin collecting.")
     else:
