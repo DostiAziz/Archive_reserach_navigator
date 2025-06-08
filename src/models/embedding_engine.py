@@ -34,6 +34,8 @@ class DocumentProcessor:
                                                             length_function=len)
 
         self.vectorstore = None
+        self.current_author_names = []
+
         logger.info(f"Document processor initialized")
 
     def prepare_documents(self, paper_df: pd.DataFrame) -> List[Document]:
@@ -50,7 +52,10 @@ class DocumentProcessor:
                 # create content by combining title and abstract
                 title = paper.title
                 abstract = paper.abstract
-                content = f"Title: {title}\nAbstract: {abstract}"
+                auther = paper.authors
+                published = paper.published
+
+                content = f"Title: {title}\nAbstract: {abstract}\nAuthors: {auther}\nPublished: {published}\n"
 
                 # create metadata for each document
                 metadata = {
@@ -112,6 +117,10 @@ class DocumentProcessor:
                 collection_name=collection_name,
                 collection_metadata={"hnsw:space": "cosine"}
             )
+
+            # Process documents to enhance content with metadata
+            # enhanced_documents = self._enhance_documents_with_metadata(documents)
+
             # Add documents in batches
             batch_size = 100
             total_added = 0
@@ -129,6 +138,70 @@ class DocumentProcessor:
             logger.error(f'failed to build {collection_name} vectorstore: {e}')
             raise e
 
+    def _enhance_documents_with_metadata(self, documents: List[Document]) -> List[Document]:
+        """Enhance documents with metadata for better context retrieval
+        Args:
+            documents (List[Document]): list of documents
+        Returns:
+            List[Document]: list of documents with enhanced metadata
+        """
+        enhanced_documents = []
+        for doc in documents:
+            try:
+                metadatas = doc.metadata
+                title = metadatas.get('title', 'Unknown Title')
+                authors = metadatas.get('authors', 'Unknown Author')
+                published = metadatas.get('published', 'Unknown Published')
+                categories = metadatas.get('categories', 'No categories available')
+                id = metadatas.get('id', 'Unknown ID')
+                # Enhance content with metadata
+                enhanced_content = self._format_enhanced_content(main_content, title, authors, published, categories,
+                                                                 id)
+                # Create new document with enhanced content but preserve original metadata
+                enhanced_doc = Document(
+                    page_content=enhanced_content,
+                    metadata=metadata  # Keep original metadata intact
+                )
+
+                enhanced_documents.append(enhanced_doc)
+
+            except Exception as e:
+                logger.warning(f"Failed to enhance document, using original: {e}")
+                enhanced_documents.append(doc)
+
+            logger.info(f"Enhanced {len(enhanced_documents)} documents with metadata")
+            return enhanced_documents
+
+    def _format_enhanced_content(self, main_content: str, title: str, authors: str, published: str, categories: str,
+                                 id: str) -> str:
+        """Format the enhanced content with metadata
+        Args:
+            title (str): title of the document
+            authors (str): authors of the document
+            published (str): published date of the document
+            abstract (str): abstract of the document
+            categories (str): categories of the document
+            id (str): id of the document
+        Returns:
+            str: formatted content with metadata
+        """
+        metadata_section = "=== PAPER METADATA ===\n"
+
+        if title:
+            metadata_section += f"Title: {title}\n"
+        if authors:
+            metadata_section += f"Authors: {authors}\n"
+        if published:
+            metadata_section += f"Published year: {published}\n"
+        if categories:
+            metadata_section += f"Categories: {categories}\n"
+        if id:
+            metadata_section += f"ID: {id}\n"
+
+        enhanced_content = f"{metadata_section}\n=== DOCUMENT CONTENT ===\n{main_content}\n"
+
+        return enhanced_content
+
     def load_vectorstore(self, collection_name: str = 'research_papers'):
         """Load vectorstore from collection
         Args:
@@ -141,38 +214,144 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f'failed to load {collection_name} vectorstore')
 
-    def query_vectorstore(self, query: str, k: int = 5) -> List[Dict]:
-        """Query the knowledge base using sematic similarity
-        Args:
-            query (str): question to be asked
-            k (int, optional): number of similar documents to return. Defaults to 5.
-        Returns:
-            List[Dict]: list of dictionaries containing relevant information
-        """
+    def create_author_filter(self, author_names: List[str]) -> dict:
+        """Create author filter using Chroma-compatible operators"""
+        if not author_names:
+            return None
+
+        # Chroma only supports: $gt, $gte, $lt, $lte, $ne, $eq, $in, $nin
+        if len(author_names) == 1:
+            # Single author - try exact match first
+            return {
+                'authors': {'$eq': author_names[0]}
+            }
+        else:
+            # Multiple authors - use $in
+            return {
+                'authors': {'$in': author_names}
+            }
+
+    def create_author_filter(self, author_names: List[str]) -> dict:
+        """Create author filter - but we'll rely on manual filtering since Chroma doesn't support partial matching"""
+        # Since Chroma doesn't support partial matching well, we'll skip metadata filtering
+        # and go straight to manual filtering
+        return None
+
+    def query_vectorstore(self, query: str, is_author_query: bool, author_names: List[str], k: int = 5) -> List[Dict]:
+        """Query the knowledge base using semantic similarity and metadata filtering"""
         try:
             logger.info(f'Querying knowledge base using {query}')
-            # get more results to allow for better filtering
-            query_results = self.vectorstore.similarity_search_with_score(query, k=k)
 
-            # sort returned results from most similar to less
-            query_results = sorted(query_results, key=lambda x: x[1], reverse=True)
+            if is_author_query and author_names:
+                logger.info(f'Author query detected, filtering by author: {author_names}')
+
+                # Store author names for manual filtering
+                self.current_author_names = author_names
+
+                # Skip metadata filtering and go straight to manual filtering
+                # because Chroma doesn't support partial text matching
+                logger.info("Using manual filtering for partial author name matching")
+                query_results = self._manual_author_filtering(query, k)
+            else:
+                self.current_author_names = []
+                query_results = self.vectorstore.similarity_search_with_score(query=query, k=k)
 
             formatted_results = []
             for index, (doc, score) in enumerate(query_results):
-                result = {'rank': index + 1,
-                          'similarity_score': score,
-                          'content': doc.page_content,
-                          'metadata': doc.metadata
-                          }
+                result = {
+                    'rank': index + 1,
+                    'similarity_score': score,
+                    'content': doc.page_content,
+                    'metadata': doc.metadata
+                }
                 formatted_results.append(result)
 
-            logger.info(f'Query {query} returned {len(query_results)} relevant papers')
-
+            logger.info(f'Query "{query}" returned {len(formatted_results)} relevant papers')
             return formatted_results
 
         except Exception as e:
-            logger.error(f'failed to query {query}')
-            raise e
+            logger.error(f"Error querying vectorstore: {e}")
+            return []
+
+    def _manual_author_filtering(self, query: str, k: int):
+        """Manual filtering for partial author name matching"""
+        try:
+            logger.info(f"Manual filtering for authors: {self.current_author_names}")
+
+            # Get more results to filter from (increase multiplier for better results)
+            search_k = min(k * 20, 200)  # Get up to 200 docs to filter from
+            all_results = self.vectorstore.similarity_search_with_score(query=query, k=search_k)
+
+            logger.info(f"Retrieved {len(all_results)} documents to filter")
+
+            filtered_results = []
+
+            for doc, score in all_results:
+                authors_field = str(doc.metadata.get('authors', ''))
+
+                # Check if any author name appears in the authors field (partial matching)
+                match_found = False
+                for author_name in self.current_author_names:
+                    if self._is_author_match(author_name, authors_field):
+                        match_found = True
+                        logger.info(f"✓ Found match for '{author_name}' in: {authors_field}")
+                        break
+
+                if match_found:
+                    filtered_results.append((doc, score))
+
+                # if len(filtered_results) >= k:
+                #     break
+
+            logger.info(f"Manual filtering found {len(filtered_results)} results out of {len(all_results)} total")
+
+            # If we didn't find enough results, log some examples of what we did find
+            if len(filtered_results) < k and len(all_results) > 0:
+                logger.info("Sample authors fields from unmatched documents:")
+                for i, (doc, _) in enumerate(all_results[:5]):
+                    sample_authors = doc.metadata.get('authors', 'No authors')
+                    logger.info(f"  Sample {i + 1}: {sample_authors}")
+
+            return filtered_results
+
+        except Exception as e:
+            logger.error(f"Manual filtering error: {e}")
+            return []
+
+    def _is_author_match(self, search_author: str, authors_field: str) -> bool:
+        """Check if search author matches any author in the authors field"""
+        if not search_author or not authors_field:
+            return False
+
+        # Convert to lowercase for case-insensitive matching
+        search_lower = search_author.lower().strip()
+        authors_lower = authors_field.lower()
+
+        # Method 1: Direct substring match
+        if search_lower in authors_lower:
+            return True
+
+        # Method 2: Split by common author separators and check each part
+        # Common separators: comma, semicolon, "and", "&"
+        import re
+        # Split by various separators
+        authors_list = re.split(r'[,;&]|\band\b', authors_lower)
+        authors_list = [author.strip() for author in authors_list if author.strip()]
+
+        for author in authors_list:
+            if search_lower in author or author in search_lower:
+                return True
+
+        # Method 3: Check individual words (for partial name matching)
+        search_words = search_lower.split()
+        for word in search_words:
+            if len(word) > 2 and word in authors_lower:  # Only check words longer than 2 chars
+                # Additional check: make sure it's not a common word
+                common_words = {'the', 'and', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'from'}
+                if word not in common_words:
+                    return True
+
+        return False
 
     def get_retriever(self, search_kwargs: Dict = None):
         """Get langchain retriever for RAG"""
@@ -189,6 +368,7 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f'Failed to create retriever: {e}')
             raise e
+
 
 #
 # if __name__ == '__main__':
