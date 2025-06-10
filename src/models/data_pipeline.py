@@ -21,11 +21,11 @@ class DataPipeline:
         set.
 
         Args:
-            :param query: search query
-            :param category: search category
-            :param max_results: maximum number of results to return
-            :param sort_by: sort by
-            :param sort_order: order of sorting
+            query (str): The search query to use.
+            category (str): The category to search in (default is "all").
+            max_results (int): Maximum number of results to return (default is 10).
+            sort_by (str): Field to sort by (default is "relevance").
+            sort_order (str): Order of sorting, either "ascending" or "descending" (default is "descending").
         Returns:
             List[Dict]: List of search results.
         """
@@ -38,7 +38,6 @@ class DataPipeline:
                 'sortBy': sort_by,
                 'sortOrder': sort_order,
             }
-            print(f'the search query is {search_query}')
             response = requests.get(self.base_url, params=params)
             logger.info(f"Search response status: {response.status_code}")
 
@@ -54,7 +53,7 @@ class DataPipeline:
     def _parse_arxiv_response(self, xml_content: str) -> List[Dict]:
         """
         Parses the XML content from the arXiv API response and extracts relevant
-        information about papers, such as title, abstract, DOI, publication date,
+        information about papers, such as title, abstract, ID, publication date,
         authors, and categories.
 
         Args:
@@ -75,6 +74,7 @@ class DataPipeline:
                     'published': entry.find('atom:published', ns).text.strip(),
                     'updated': entry.find('atom:updated', ns).text.strip(),
                 }
+                # Extract authors
                 authors = []
                 for author in entry.findall('atom:author', ns):
                     name = author.find('atom:name', ns).text.strip()
@@ -83,6 +83,7 @@ class DataPipeline:
                 paper['authors'] = ', '.join(authors)
                 categories = []
 
+                # Extract categories
                 for category in entry.findall('atom:category', ns):
                     categories.append(category.get('term'))
                 paper['categories'] = ', '.join(categories)
@@ -98,11 +99,11 @@ class DataPipeline:
                         sort_order: str = "descending") -> List[Dict]:
         """Process list of queries which seperated by, for retrieving papers from api
         Args:
-            :param query: search queries separated by,
-            :param category: search category
-            :param max_results: maximum number of results to return
-            :param sort_by: sort by
-            :param sort_order: order of sorting
+            query (str): The search query to use, can be a comma-separated list of queries.
+            category (str): The category to search in (default is "all").
+            max_results (int): Maximum number of results to return for each query (default is 10).
+            sort_by (str): Field to sort by (default is "relevance").
+            sort_order (str): Order of sorting, either "ascending" or "descending" (default is "descending").
         Returns:
             List[Dict]: List of search results.
         """
