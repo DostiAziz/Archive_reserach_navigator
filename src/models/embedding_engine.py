@@ -28,7 +28,7 @@ class DocumentProcessor:
         self.persistent_directory = Config.VECTOR_STORE_DIR
         os.makedirs(self.persistent_directory, exist_ok=True)
 
-        # Chunking of retreived documents
+        # Used for chunking of retreived documents
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=Config.CHUNK_SIZE,
                                                             chunk_overlap=Config.OVERLAP,
                                                             length_function=len)
@@ -41,7 +41,7 @@ class DocumentProcessor:
     def prepare_documents(self, paper_df: pd.DataFrame) -> List[Document]:
         """Convert dataframe containng retrieved paper information for langchain documents
         Args:
-            paper_df (pd.DataFrame): paper dataframe
+            paper_df (pd.DataFrame): papers dataframe
         Returns:
             List[Document] list containing paper documents in langchain format
         """
@@ -52,18 +52,18 @@ class DocumentProcessor:
                 # create content by combining title and abstract
                 title = paper.title
                 abstract = paper.abstract
-                auther = paper.authors
-                published = paper.published
+                authors = paper.authors
+                published = paper.published.split('T')[0] if paper.published else None
 
-                content = f"Title: {title}\nAbstract: {abstract}\nAuthors: {auther}\nPublished: {published}\n"
+                content = f"Title: {title}\n Abstract: {abstract} \n Authors: {authors} \n Publication year: {published}"
 
                 # create metadata for each document
                 metadata = {
                     'title': title,
                     'id': paper.id,
-                    'authors': paper.authors,
+                    'authors': authors,
                     'categories': paper.categories,
-                    'published': paper.published,
+                    'year-published': published,
 
                 }
                 doc = Document(page_content=content, metadata=metadata)
@@ -101,10 +101,14 @@ class DocumentProcessor:
         try:
             try:
                 import chromadb
-                # retrieve database instance and delete it if exists
                 client = chromadb.PersistentClient(path=self.persistent_directory)
-                client.delete_collection(name=collection_name)
-                logger.info(f'Successfully deleted old {collection_name} vectorstore')
+                collection_names = [col.name for col in client.list_collections()]
+                logger.info(f'Existing collections: {collection_names}')
+
+                if collection_name in collection_names:
+                    logger.info(f'Found existing collection {collection_name}, attempting to delete')
+                    client.delete_collection(name=collection_name)
+                    logger.info(f'Successfully deleted old {collection_name} vectorstore')
             except Exception as e:
                 logger.error(f'failed to delete old instances of {collection_name} vectorstore: {e}')
 
@@ -117,9 +121,6 @@ class DocumentProcessor:
                 collection_name=collection_name,
                 collection_metadata={"hnsw:space": "cosine"}
             )
-
-            # Process documents to enhance content with metadata
-            # enhanced_documents = self._enhance_documents_with_metadata(documents)
 
             # Add documents in batches
             batch_size = 100
@@ -138,71 +139,8 @@ class DocumentProcessor:
             logger.error(f'failed to build {collection_name} vectorstore: {e}')
             raise e
 
-    def _enhance_documents_with_metadata(self, documents: List[Document]) -> List[Document]:
-        """Enhance documents with metadata for better context retrieval
-        Args:
-            documents (List[Document]): list of documents
-        Returns:
-            List[Document]: list of documents with enhanced metadata
-        """
-        enhanced_documents = []
-        for doc in documents:
-            try:
-                metadatas = doc.metadata
-                title = metadatas.get('title', 'Unknown Title')
-                authors = metadatas.get('authors', 'Unknown Author')
-                published = metadatas.get('published', 'Unknown Published')
-                categories = metadatas.get('categories', 'No categories available')
-                id = metadatas.get('id', 'Unknown ID')
-                # Enhance content with metadata
-                enhanced_content = self._format_enhanced_content(main_content, title, authors, published, categories,
-                                                                 id)
-                # Create new document with enhanced content but preserve original metadata
-                enhanced_doc = Document(
-                    page_content=enhanced_content,
-                    metadata=metadata  # Keep original metadata intact
-                )
-
-                enhanced_documents.append(enhanced_doc)
-
-            except Exception as e:
-                logger.warning(f"Failed to enhance document, using original: {e}")
-                enhanced_documents.append(doc)
-
-            logger.info(f"Enhanced {len(enhanced_documents)} documents with metadata")
-            return enhanced_documents
-
-    def _format_enhanced_content(self, main_content: str, title: str, authors: str, published: str, categories: str,
-                                 id: str) -> str:
-        """Format the enhanced content with metadata
-        Args:
-            title (str): title of the document
-            authors (str): authors of the document
-            published (str): published date of the document
-            abstract (str): abstract of the document
-            categories (str): categories of the document
-            id (str): id of the document
-        Returns:
-            str: formatted content with metadata
-        """
-        metadata_section = "=== PAPER METADATA ===\n"
-
-        if title:
-            metadata_section += f"Title: {title}\n"
-        if authors:
-            metadata_section += f"Authors: {authors}\n"
-        if published:
-            metadata_section += f"Published year: {published}\n"
-        if categories:
-            metadata_section += f"Categories: {categories}\n"
-        if id:
-            metadata_section += f"ID: {id}\n"
-
-        enhanced_content = f"{metadata_section}\n=== DOCUMENT CONTENT ===\n{main_content}\n"
-
-        return enhanced_content
-
     def load_vectorstore(self, collection_name: str = 'research_papers'):
+
         """Load vectorstore from collection
         Args:
             collection_name (str, optional): collection name. Defaults to 'research_papers'.
@@ -214,49 +152,31 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f'failed to load {collection_name} vectorstore')
 
-    def create_author_filter(self, author_names: List[str]) -> dict:
-        """Create author filter using Chroma-compatible operators"""
-        if not author_names:
-            return None
-
-        # Chroma only supports: $gt, $gte, $lt, $lte, $ne, $eq, $in, $nin
-        if len(author_names) == 1:
-            # Single author - try exact match first
-            return {
-                'authors': {'$eq': author_names[0]}
-            }
-        else:
-            # Multiple authors - use $in
-            return {
-                'authors': {'$in': author_names}
-            }
-
-    def create_author_filter(self, author_names: List[str]) -> dict:
-        """Create author filter - but we'll rely on manual filtering since Chroma doesn't support partial matching"""
-        # Since Chroma doesn't support partial matching well, we'll skip metadata filtering
-        # and go straight to manual filtering
-        return None
-
     def query_vectorstore(self, query: str, is_author_query: bool, author_names: List[str], k: int = 5) -> List[Dict]:
-        """Query the knowledge base using semantic similarity and metadata filtering"""
+        """Query the knowledge base using semantic similarity and metadata filtering
+        Args:
+            query (str): search query
+            is_author_query (bool): whether the query is related to authors
+            author_names (List[str]): list of author names to filter by
+            k (int): number of results to return
+
+        """
         try:
             logger.info(f'Querying knowledge base using {query}')
 
             if is_author_query and author_names:
                 logger.info(f'Author query detected, filtering by author: {author_names}')
-
                 # Store author names for manual filtering
                 self.current_author_names = author_names
-
-                # Skip metadata filtering and go straight to manual filtering
-                # because Chroma doesn't support partial text matching
                 logger.info("Using manual filtering for partial author name matching")
                 query_results = self._manual_author_filtering(query, k)
             else:
+                logger.info("Query is not realted to authors, so perform standard similarity search")
                 self.current_author_names = []
                 query_results = self.vectorstore.similarity_search_with_score(query=query, k=k)
 
             formatted_results = []
+            query_results = sorted(query_results, key=lambda x: x[1], reverse=True)
             for index, (doc, score) in enumerate(query_results):
                 result = {
                     'rank': index + 1,
@@ -274,7 +194,11 @@ class DocumentProcessor:
             return []
 
     def _manual_author_filtering(self, query: str, k: int):
-        """Manual filtering for partial author name matching"""
+        """Manual filtering for partial author name matching
+        Args:
+            query (str): search query
+            k (int): number of results to return
+        """
         try:
             logger.info(f"Manual filtering for authors: {self.current_author_names}")
 
@@ -287,6 +211,7 @@ class DocumentProcessor:
             filtered_results = []
 
             for doc, score in all_results:
+                # Convert authors field to string for matching
                 authors_field = str(doc.metadata.get('authors', ''))
 
                 # Check if any author name appears in the authors field (partial matching)
@@ -319,7 +244,14 @@ class DocumentProcessor:
             return []
 
     def _is_author_match(self, search_author: str, authors_field: str) -> bool:
-        """Check if search author matches any author in the authors field"""
+        """Check if search author matches any author in the authors field
+        Args:
+            search_author (str): author name to search for
+            authors_field (str): authors field from the document metadata
+        Returns:
+            bool: True if a match is found, False otherwise
+        """
+        # Check if search_author or authors_field is empty
         if not search_author or not authors_field:
             return False
 
@@ -327,29 +259,12 @@ class DocumentProcessor:
         search_lower = search_author.lower().strip()
         authors_lower = authors_field.lower()
 
-        # Method 1: Direct substring match
-        if search_lower in authors_lower:
-            return True
-
-        # Method 2: Split by common author separators and check each part
-        # Common separators: comma, semicolon, "and", "&"
-        import re
-        # Split by various separators
-        authors_list = re.split(r'[,;&]|\band\b', authors_lower)
-        authors_list = [author.strip() for author in authors_list if author.strip()]
+        # Split by comma and check each author
+        authors_list = [author.strip() for author in authors_lower.split(',') if author.strip()]
 
         for author in authors_list:
             if search_lower in author or author in search_lower:
                 return True
-
-        # Method 3: Check individual words (for partial name matching)
-        search_words = search_lower.split()
-        for word in search_words:
-            if len(word) > 2 and word in authors_lower:  # Only check words longer than 2 chars
-                # Additional check: make sure it's not a common word
-                common_words = {'the', 'and', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'from'}
-                if word not in common_words:
-                    return True
 
         return False
 
@@ -368,7 +283,6 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f'Failed to create retriever: {e}')
             raise e
-
 
 #
 # if __name__ == '__main__':
