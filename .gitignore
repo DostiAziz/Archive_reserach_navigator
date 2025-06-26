@@ -59,6 +59,7 @@ Dockerfile
 *.tmp
 temp/
 
+# ADD THESE MISSING LINES:
 # Database files (ChromaDB)
 data/chromadb/
 *.sqlite3
