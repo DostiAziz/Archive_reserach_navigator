@@ -1,0 +1,23 @@
+2025-06-03 21:16:41,593 - data_pipeline - INFO - Search response status: 200
+2025-06-03 21:16:41,669 - data_pipeline - INFO - Found 970 papers
+2025-06-03 21:16:43,790 - embedding-engine - INFO - Using device: cpu
+2025-06-03 21:16:44,294 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-03 21:16:59,265 - embedding-engine - INFO - Document processor initialized
+2025-06-03 21:16:59,265 - embedding-engine - INFO - converting 970 paper documents
+2025-06-03 21:17:01,480 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-03 21:17:02,456 - embedding-engine - ERROR - failed to create rag vectorstore: Collection [rag] does not exists
+2025-06-03 21:17:02,456 - embedding-engine - INFO - Building rag vectorstore
+2025-06-03 21:17:04,961 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-03 21:17:06,463 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-03 21:17:07,979 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-03 21:17:09,801 - embedding-engine - INFO - Added batch 4, total documents: 400
+2025-06-03 21:17:11,583 - embedding-engine - INFO - Added batch 5, total documents: 500
+2025-06-03 21:17:12,865 - embedding-engine - INFO - Added batch 6, total documents: 600
+2025-06-03 21:17:14,103 - embedding-engine - INFO - Added batch 7, total documents: 700
+2025-06-03 21:17:16,353 - embedding-engine - INFO - Added batch 8, total documents: 800
+2025-06-03 21:17:17,883 - embedding-engine - INFO - Added batch 9, total documents: 900
+2025-06-03 21:17:19,396 - embedding-engine - INFO - Added batch 10, total documents: 970
+2025-06-03 21:17:19,512 - embedding-engine - INFO - Collection rag contains 970 documents
+2025-06-03 21:17:19,521 - embedding-engine - INFO - Vectorstore loaded with 970 documents
+2025-06-03 21:17:19,894 - qa_engine - INFO - Google gemini llm initialized
+2025-06-03 21:17:19,902 - embedding-engine - INFO - Vectorstore loaded with 970 documents

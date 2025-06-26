@@ -1,0 +1,314 @@
+2025-06-04 09:41:51,768 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:41:51,768 - data_pipeline - INFO - Found 0 papers
+2025-06-04 09:42:10,866 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:42:10,866 - data_pipeline - INFO - Found 0 papers
+2025-06-04 09:43:56,175 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:43:56,175 - data_pipeline - INFO - Found 0 papers
+2025-06-04 09:44:55,720 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:44:55,720 - data_pipeline - INFO - Found 0 papers
+2025-06-04 09:45:52,792 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:45:52,792 - data_pipeline - INFO - Found 0 papers
+2025-06-04 09:56:50,423 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:56:50,423 - data_pipeline - INFO - Found 0 papers
+2025-06-04 09:57:20,596 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:57:20,612 - data_pipeline - INFO - Found 50 papers
+2025-06-04 09:57:22,714 - embedding-engine - INFO - Using device: cuda
+2025-06-04 09:57:23,191 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 09:57:28,127 - embedding-engine - INFO - Document processor initialized
+2025-06-04 09:57:28,127 - embedding-engine - INFO - converting 50 paper documents
+2025-06-04 09:57:30,228 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-04 09:57:31,471 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 09:57:31,471 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 09:57:32,186 - embedding-engine - INFO - Added batch 1, total documents: 50
+2025-06-04 09:57:32,186 - embedding-engine - INFO - Collection rag contains 50 documents
+2025-06-04 09:57:32,216 - embedding-engine - INFO - Vectorstore loaded with 50 documents
+2025-06-04 09:57:32,302 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 09:57:32,331 - embedding-engine - INFO - Vectorstore loaded with 50 documents
+2025-06-04 09:58:38,679 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:58:38,679 - data_pipeline - INFO - Found 50 papers
+2025-06-04 09:58:40,687 - embedding-engine - INFO - Using device: cuda
+2025-06-04 09:58:40,689 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 09:58:42,256 - embedding-engine - INFO - Document processor initialized
+2025-06-04 09:58:42,256 - embedding-engine - INFO - converting 50 paper documents
+2025-06-04 09:58:44,293 - embedding-engine - ERROR - failed to delete old instances of ml vectorstore: Collection [ml] does not exists
+2025-06-04 09:58:44,293 - embedding-engine - INFO - Building ml vectorstore
+2025-06-04 09:58:44,325 - embedding-engine - ERROR - failed to build ml vectorstore: Validation error: name: Expected a name containing 3-512 characters from [a-zA-Z0-9._-], starting and ending with a character in [a-zA-Z0-9]. Got: ml
+2025-06-04 09:59:21,303 - data_pipeline - INFO - Search response status: 200
+2025-06-04 09:59:21,341 - data_pipeline - INFO - Found 650 papers
+2025-06-04 09:59:23,345 - embedding-engine - INFO - Using device: cuda
+2025-06-04 09:59:23,349 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 09:59:24,867 - embedding-engine - INFO - Document processor initialized
+2025-06-04 09:59:24,867 - embedding-engine - INFO - converting 650 paper documents
+2025-06-04 09:59:26,912 - embedding-engine - ERROR - failed to delete old instances of ml_papers vectorstore: Collection [ml_papers] does not exists
+2025-06-04 09:59:26,912 - embedding-engine - INFO - Building ml_papers vectorstore
+2025-06-04 09:59:27,490 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 09:59:27,756 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 09:59:28,054 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 09:59:28,318 - embedding-engine - INFO - Added batch 4, total documents: 400
+2025-06-04 09:59:28,563 - embedding-engine - INFO - Added batch 5, total documents: 500
+2025-06-04 09:59:28,844 - embedding-engine - INFO - Added batch 6, total documents: 600
+2025-06-04 09:59:29,024 - embedding-engine - INFO - Added batch 7, total documents: 650
+2025-06-04 09:59:29,039 - embedding-engine - INFO - Collection ml_papers contains 650 documents
+2025-06-04 09:59:29,067 - embedding-engine - INFO - Vectorstore loaded with 650 documents
+2025-06-04 09:59:29,073 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 09:59:29,103 - embedding-engine - INFO - Vectorstore loaded with 650 documents
+2025-06-04 10:00:32,305 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 10:01:09,951 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:01:09,979 - data_pipeline - INFO - Found 760 papers
+2025-06-04 10:01:11,993 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:01:11,996 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:01:13,931 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:01:13,931 - embedding-engine - INFO - converting 760 paper documents
+2025-06-04 10:01:16,041 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:01:16,041 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:01:16,628 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:01:16,866 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:01:17,103 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:01:17,372 - embedding-engine - INFO - Added batch 4, total documents: 400
+2025-06-04 10:01:17,610 - embedding-engine - INFO - Added batch 5, total documents: 500
+2025-06-04 10:01:17,852 - embedding-engine - INFO - Added batch 6, total documents: 600
+2025-06-04 10:01:18,196 - embedding-engine - INFO - Added batch 7, total documents: 700
+2025-06-04 10:01:18,384 - embedding-engine - INFO - Added batch 8, total documents: 760
+2025-06-04 10:01:18,399 - embedding-engine - INFO - Collection rag contains 760 documents
+2025-06-04 10:01:18,432 - embedding-engine - INFO - Vectorstore loaded with 760 documents
+2025-06-04 10:01:18,447 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:01:18,479 - embedding-engine - INFO - Vectorstore loaded with 760 documents
+2025-06-04 10:04:57,375 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:04:57,406 - data_pipeline - INFO - Found 780 papers
+2025-06-04 10:04:59,422 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:04:59,423 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:05:01,225 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:05:01,225 - embedding-engine - INFO - converting 780 paper documents
+2025-06-04 10:05:03,343 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:05:03,343 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:05:03,973 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:05:04,228 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:05:04,516 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:05:04,812 - embedding-engine - INFO - Added batch 4, total documents: 400
+2025-06-04 10:05:05,036 - embedding-engine - INFO - Added batch 5, total documents: 500
+2025-06-04 10:05:05,323 - embedding-engine - INFO - Added batch 6, total documents: 600
+2025-06-04 10:05:05,625 - embedding-engine - INFO - Added batch 7, total documents: 700
+2025-06-04 10:05:05,875 - embedding-engine - INFO - Added batch 8, total documents: 780
+2025-06-04 10:05:05,895 - embedding-engine - INFO - Collection rag contains 780 documents
+2025-06-04 10:05:05,924 - embedding-engine - INFO - Vectorstore loaded with 780 documents
+2025-06-04 10:05:05,938 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:05:05,969 - embedding-engine - INFO - Vectorstore loaded with 780 documents
+2025-06-04 10:05:56,501 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:05:56,532 - data_pipeline - INFO - Found 780 papers
+2025-06-04 10:14:00,441 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:14:00,457 - data_pipeline - INFO - Found 480 papers
+2025-06-04 10:14:02,469 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:14:02,484 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:14:04,192 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:14:04,192 - embedding-engine - INFO - converting 480 paper documents
+2025-06-04 10:14:06,296 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:14:06,296 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:14:06,771 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:14:07,025 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:14:07,296 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:14:07,568 - embedding-engine - INFO - Added batch 4, total documents: 400
+2025-06-04 10:14:07,744 - embedding-engine - INFO - Added batch 5, total documents: 480
+2025-06-04 10:14:07,760 - embedding-engine - INFO - Collection rag contains 480 documents
+2025-06-04 10:14:07,792 - embedding-engine - INFO - Vectorstore loaded with 480 documents
+2025-06-04 10:14:07,808 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:14:07,840 - embedding-engine - INFO - Vectorstore loaded with 480 documents
+2025-06-04 10:15:30,299 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 10:20:48,635 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:20:48,651 - data_pipeline - INFO - Found 360 papers
+2025-06-04 10:20:50,657 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:20:50,657 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:20:52,198 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:20:52,198 - embedding-engine - INFO - converting 360 paper documents
+2025-06-04 10:20:54,292 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:20:54,292 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:20:54,838 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:20:55,072 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:20:55,338 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:20:55,528 - embedding-engine - INFO - Added batch 4, total documents: 360
+2025-06-04 10:20:55,534 - embedding-engine - INFO - Collection rag contains 360 documents
+2025-06-04 10:20:55,558 - embedding-engine - INFO - Vectorstore loaded with 360 documents
+2025-06-04 10:20:55,574 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:20:55,610 - embedding-engine - INFO - Vectorstore loaded with 360 documents
+2025-06-04 10:25:42,517 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:25:42,533 - data_pipeline - INFO - Found 380 papers
+2025-06-04 10:25:44,544 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:25:44,548 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:25:46,064 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:25:46,064 - embedding-engine - INFO - converting 380 paper documents
+2025-06-04 10:25:48,164 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:25:48,164 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:25:48,783 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:25:49,108 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:25:49,416 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:25:49,691 - embedding-engine - INFO - Added batch 4, total documents: 380
+2025-06-04 10:25:49,691 - embedding-engine - INFO - Collection rag contains 380 documents
+2025-06-04 10:25:49,736 - embedding-engine - INFO - Vectorstore loaded with 380 documents
+2025-06-04 10:25:49,736 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:25:49,770 - embedding-engine - INFO - Vectorstore loaded with 380 documents
+2025-06-04 10:30:05,492 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:30:05,508 - data_pipeline - INFO - Found 400 papers
+2025-06-04 10:30:07,517 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:30:07,517 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:30:09,305 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:30:09,305 - embedding-engine - INFO - converting 400 paper documents
+2025-06-04 10:30:11,415 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:30:11,415 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:30:12,129 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:30:12,416 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:30:12,789 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:30:13,130 - embedding-engine - INFO - Added batch 4, total documents: 400
+2025-06-04 10:30:13,133 - embedding-engine - INFO - Collection rag contains 400 documents
+2025-06-04 10:30:13,165 - embedding-engine - INFO - Vectorstore loaded with 400 documents
+2025-06-04 10:30:13,180 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:30:13,200 - embedding-engine - INFO - Vectorstore loaded with 400 documents
+2025-06-04 10:31:15,025 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:31:15,031 - data_pipeline - INFO - Found 100 papers
+2025-06-04 10:31:17,038 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:31:17,041 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:31:18,791 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:31:18,791 - embedding-engine - INFO - converting 100 paper documents
+2025-06-04 10:31:20,855 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:31:20,855 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:31:21,447 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:31:21,448 - embedding-engine - INFO - Collection rag contains 100 documents
+2025-06-04 10:31:21,479 - embedding-engine - INFO - Vectorstore loaded with 100 documents
+2025-06-04 10:31:21,479 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:31:21,517 - embedding-engine - INFO - Vectorstore loaded with 100 documents
+2025-06-04 10:31:50,699 - embedding-engine - INFO - Querying knowledge base using What is new?
+2025-06-04 10:31:50,762 - embedding-engine - INFO - Query What is new? returned 5 relevant papers
+2025-06-04 10:31:50,762 - qa_engine - INFO - Formating retrieved results
+2025-06-04 10:31:50,762 - qa_engine - INFO - Length of formatted results 5597
+2025-06-04 10:37:34,753 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:37:34,785 - data_pipeline - INFO - Found 530 papers
+2025-06-04 10:37:36,792 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:37:36,792 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:37:38,279 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:37:38,279 - embedding-engine - INFO - converting 530 paper documents
+2025-06-04 10:37:40,395 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:37:40,395 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:37:40,925 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:37:41,159 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:37:41,425 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:37:41,706 - embedding-engine - INFO - Added batch 4, total documents: 400
+2025-06-04 10:37:41,956 - embedding-engine - INFO - Added batch 5, total documents: 500
+2025-06-04 10:37:42,066 - embedding-engine - INFO - Added batch 6, total documents: 530
+2025-06-04 10:37:42,081 - embedding-engine - INFO - Collection rag contains 530 documents
+2025-06-04 10:37:42,113 - embedding-engine - INFO - Vectorstore loaded with 530 documents
+2025-06-04 10:37:42,128 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:37:42,150 - embedding-engine - INFO - Vectorstore loaded with 530 documents
+2025-06-04 10:44:12,247 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:44:12,264 - data_pipeline - INFO - Found 370 papers
+2025-06-04 10:44:14,287 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:44:14,789 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:44:19,294 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:44:19,294 - embedding-engine - INFO - converting 370 paper documents
+2025-06-04 10:44:21,408 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-04 10:44:21,653 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:44:21,653 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:44:22,075 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:44:22,356 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 10:44:22,590 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-04 10:44:22,794 - embedding-engine - INFO - Added batch 4, total documents: 370
+2025-06-04 10:44:22,808 - embedding-engine - INFO - Collection rag contains 370 documents
+2025-06-04 10:44:22,841 - embedding-engine - INFO - Vectorstore loaded with 370 documents
+2025-06-04 10:44:22,890 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:44:22,920 - embedding-engine - INFO - Vectorstore loaded with 370 documents
+2025-06-04 10:44:48,079 - embedding-engine - INFO - Querying knowledge base using What is new
+2025-06-04 10:44:48,114 - embedding-engine - INFO - Query What is new returned 5 relevant papers
+2025-06-04 10:44:48,114 - qa_engine - INFO - Formating retrieved results
+2025-06-04 10:44:48,114 - qa_engine - INFO - Length of formatted results 6823
+2025-06-04 10:44:48,314 - qa_engine - ERROR - Error generating answer: Invalid argument provided to Gemini: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-04 10:45:46,215 - embedding-engine - INFO - Querying knowledge base using hu
+2025-06-04 10:45:46,218 - embedding-engine - INFO - Query hu returned 5 relevant papers
+2025-06-04 10:45:46,218 - qa_engine - INFO - Formating retrieved results
+2025-06-04 10:45:46,218 - qa_engine - INFO - Length of formatted results 2651
+2025-06-04 10:45:46,262 - qa_engine - ERROR - Error generating answer: Invalid argument provided to Gemini: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-04 10:46:08,562 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:46:08,562 - data_pipeline - INFO - Found 50 papers
+2025-06-04 10:46:10,578 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:46:10,578 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:46:12,265 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:46:12,265 - embedding-engine - INFO - converting 50 paper documents
+2025-06-04 10:46:14,342 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:46:14,342 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:46:14,858 - embedding-engine - INFO - Added batch 1, total documents: 50
+2025-06-04 10:46:14,874 - embedding-engine - INFO - Collection rag contains 50 documents
+2025-06-04 10:46:14,889 - embedding-engine - INFO - Vectorstore loaded with 50 documents
+2025-06-04 10:46:14,906 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:46:14,938 - embedding-engine - INFO - Vectorstore loaded with 50 documents
+2025-06-04 10:46:31,746 - embedding-engine - INFO - Querying knowledge base using what is the main theme
+2025-06-04 10:46:31,869 - embedding-engine - INFO - Query what is the main theme returned 5 relevant papers
+2025-06-04 10:46:31,869 - qa_engine - INFO - Formating retrieved results
+2025-06-04 10:46:31,869 - qa_engine - INFO - Length of formatted results 7198
+2025-06-04 10:46:32,039 - qa_engine - ERROR - Error generating answer: Invalid argument provided to Gemini: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-04 10:48:54,377 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:48:54,408 - data_pipeline - INFO - Found 630 papers
+2025-06-04 10:48:58,634 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 10:48:58,634 - data_pipeline - ERROR - Error parsing xml response: Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 10:49:40,285 - data_pipeline - INFO - Search response status: 200
+2025-06-04 10:49:40,301 - data_pipeline - INFO - Found 140 papers
+2025-06-04 10:49:42,315 - embedding-engine - INFO - Using device: cuda
+2025-06-04 10:49:42,378 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 10:49:44,669 - embedding-engine - INFO - Document processor initialized
+2025-06-04 10:49:44,669 - embedding-engine - INFO - converting 140 paper documents
+2025-06-04 10:49:46,692 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-04 10:49:46,788 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-04 10:49:46,788 - embedding-engine - INFO - Building rag vectorstore
+2025-06-04 10:49:47,222 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 10:49:47,341 - embedding-engine - INFO - Added batch 2, total documents: 140
+2025-06-04 10:49:47,347 - embedding-engine - INFO - Collection rag contains 140 documents
+2025-06-04 10:49:47,378 - embedding-engine - INFO - Vectorstore loaded with 140 documents
+2025-06-04 10:49:47,395 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 10:49:47,420 - embedding-engine - INFO - Vectorstore loaded with 140 documents
+2025-06-04 10:50:01,832 - embedding-engine - INFO - Querying knowledge base using hi
+2025-06-04 10:50:01,866 - embedding-engine - INFO - Query hi returned 5 relevant papers
+2025-06-04 10:50:01,866 - qa_engine - INFO - Formating retrieved results
+2025-06-04 10:50:01,866 - qa_engine - INFO - Length of formatted results 3624
+2025-06-04 10:50:09,016 - embedding-engine - INFO - Querying knowledge base using What is new 
+2025-06-04 10:50:09,028 - embedding-engine - INFO - Query What is new  returned 5 relevant papers
+2025-06-04 10:50:09,030 - qa_engine - INFO - Formating retrieved results
+2025-06-04 10:50:09,030 - qa_engine - INFO - Length of formatted results 5990
+2025-06-04 13:04:22,979 - data_pipeline - INFO - Search response status: 200
+2025-06-04 13:04:22,993 - data_pipeline - INFO - Found 290 papers
+2025-06-04 13:04:25,010 - embedding-engine - INFO - Using device: cuda
+2025-06-04 13:04:25,078 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-04 13:04:27,280 - embedding-engine - INFO - Document processor initialized
+2025-06-04 13:04:27,280 - embedding-engine - INFO - converting 290 paper documents
+2025-06-04 13:04:29,311 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-04 13:04:29,390 - embedding-engine - ERROR - failed to delete old instances of speechml vectorstore: Collection [speechml] does not exists
+2025-06-04 13:04:29,391 - embedding-engine - INFO - Building speechml vectorstore
+2025-06-04 13:04:29,855 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-04 13:04:30,124 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-04 13:04:30,371 - embedding-engine - INFO - Added batch 3, total documents: 290
+2025-06-04 13:04:30,381 - embedding-engine - INFO - Collection speechml contains 290 documents
+2025-06-04 13:04:30,413 - embedding-engine - INFO - Vectorstore loaded with 290 documents
+2025-06-04 13:04:30,429 - qa_engine - INFO - Google gemini llm initialized
+2025-06-04 13:04:30,459 - embedding-engine - INFO - Vectorstore loaded with 290 documents
+2025-06-04 13:05:10,205 - embedding-engine - INFO - Querying knowledge base using What is new in these paper?
+2025-06-04 13:05:10,242 - embedding-engine - INFO - Query What is new in these paper? returned 5 relevant papers
+2025-06-04 13:05:10,242 - qa_engine - INFO - Formating retrieved results
+2025-06-04 13:05:10,242 - qa_engine - INFO - Length of formatted results 6510

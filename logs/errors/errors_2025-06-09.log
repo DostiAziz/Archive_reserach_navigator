@@ -1,0 +1,13 @@
+2025-06-09 09:15:24,863 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-09 09:15:38,935 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-09 09:28:02,892 - embedding-engine - ERROR - failed to delete old instances of Graph rag vectorstore: Collection [Graph rag] does not exists
+2025-06-09 09:28:02,922 - embedding-engine - ERROR - failed to build Graph rag vectorstore: Validation error: name: Expected a name containing 3-512 characters from [a-zA-Z0-9._-], starting and ending with a character in [a-zA-Z0-9]. Got: Graph rag
+2025-06-09 09:28:24,405 - embedding-engine - ERROR - failed to delete old instances of Graph vectorstore: Collection [Graph] does not exists
+2025-06-09 09:29:02,709 - qa_engine - ERROR - Error generating answer: name 're' is not defined
+2025-06-09 10:22:45,035 - qa_engine - ERROR - Error generating answer: list index out of range
+2025-06-09 10:29:10,547 - qa_engine - ERROR - Error generating answer: list index out of range
+2025-06-09 10:36:24,929 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-09 10:44:28,822 - qa_engine - ERROR - Error generating answer: list index out of range
+2025-06-09 15:15:12,306 - qa_engine - ERROR - Error generating answer: list index out of range
+2025-06-09 15:16:23,581 - qa_engine - ERROR - Error generating answer: list index out of range
+2025-06-09 15:25:36,052 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))

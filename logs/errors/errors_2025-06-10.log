@@ -1,0 +1,2 @@
+2025-06-10 09:39:30,683 - embedding-engine - ERROR - failed to delete old instances of rag vectorstore: Collection [rag] does not exists
+2025-06-10 09:53:07,776 - embedding-engine - ERROR - failed to delete old instances of rag vectorstore: Collection [rag] does not exists

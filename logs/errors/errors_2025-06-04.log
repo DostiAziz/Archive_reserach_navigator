@@ -1,0 +1,35 @@
+2025-06-04 09:58:44,293 - embedding-engine - ERROR - failed to delete old instances of ml vectorstore: Collection [ml] does not exists
+2025-06-04 09:58:44,325 - embedding-engine - ERROR - failed to build ml vectorstore: Validation error: name: Expected a name containing 3-512 characters from [a-zA-Z0-9._-], starting and ending with a character in [a-zA-Z0-9]. Got: ml
+2025-06-04 09:59:26,912 - embedding-engine - ERROR - failed to delete old instances of ml_papers vectorstore: Collection [ml_papers] does not exists
+2025-06-04 10:00:32,305 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 10:15:30,299 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 10:44:48,314 - qa_engine - ERROR - Error generating answer: Invalid argument provided to Gemini: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-04 10:45:46,262 - qa_engine - ERROR - Error generating answer: Invalid argument provided to Gemini: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-04 10:46:32,039 - qa_engine - ERROR - Error generating answer: Invalid argument provided to Gemini: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-04 10:48:58,634 - data_pipeline - ERROR - Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 10:48:58,634 - data_pipeline - ERROR - Error parsing xml response: Search query failed with exception: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-04 13:04:29,390 - embedding-engine - ERROR - failed to delete old instances of speechml vectorstore: Collection [speechml] does not exists

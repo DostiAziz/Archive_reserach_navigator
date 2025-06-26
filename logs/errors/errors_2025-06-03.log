@@ -1,0 +1,2 @@
+2025-06-03 20:30:00,393 - embedding-engine - ERROR - failed to create rag vectorstore: Collection [rag] does not exists
+2025-06-03 21:17:02,456 - embedding-engine - ERROR - failed to create rag vectorstore: Collection [rag] does not exists

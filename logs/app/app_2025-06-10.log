@@ -1,0 +1,81 @@
+2025-06-10 09:39:23,821 - data_pipeline - INFO - Search response status: 200
+2025-06-10 09:39:23,831 - data_pipeline - INFO - Found 180 papers
+2025-06-10 09:39:25,836 - embedding-engine - INFO - Using device: cpu
+2025-06-10 09:39:25,915 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-10 09:39:28,077 - embedding-engine - INFO - Document processor initialized
+2025-06-10 09:39:28,077 - embedding-engine - INFO - converting 180 paper documents
+2025-06-10 09:39:30,106 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-10 09:39:30,683 - embedding-engine - ERROR - failed to delete old instances of rag vectorstore: Collection [rag] does not exists
+2025-06-10 09:39:30,684 - embedding-engine - INFO - Building rag vectorstore
+2025-06-10 09:39:33,474 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-10 09:39:35,056 - embedding-engine - INFO - Added batch 2, total documents: 180
+2025-06-10 09:39:35,061 - embedding-engine - INFO - Collection rag contains 180 documents
+2025-06-10 09:39:35,091 - embedding-engine - INFO - Vectorstore loaded with 180 documents
+2025-06-10 09:39:35,108 - qa_engine - INFO - Google gemini llm initialized
+2025-06-10 09:39:35,145 - embedding-engine - INFO - Vectorstore loaded with 180 documents
+2025-06-10 09:40:58,276 - data_pipeline - INFO - Search response status: 200
+2025-06-10 09:40:58,287 - data_pipeline - INFO - Found 150 papers
+2025-06-10 09:41:00,291 - embedding-engine - INFO - Using device: cpu
+2025-06-10 09:41:00,292 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-10 09:41:01,821 - embedding-engine - INFO - Document processor initialized
+2025-06-10 09:41:01,821 - embedding-engine - INFO - converting 150 paper documents
+2025-06-10 09:41:03,928 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-10 09:41:03,928 - embedding-engine - INFO - Building rag vectorstore
+2025-06-10 09:41:06,136 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-10 09:41:07,280 - embedding-engine - INFO - Added batch 2, total documents: 150
+2025-06-10 09:41:07,284 - embedding-engine - INFO - Collection rag contains 150 documents
+2025-06-10 09:41:07,316 - embedding-engine - INFO - Vectorstore loaded with 150 documents
+2025-06-10 09:41:07,321 - qa_engine - INFO - Google gemini llm initialized
+2025-06-10 09:41:07,353 - embedding-engine - INFO - Vectorstore loaded with 150 documents
+2025-06-10 09:50:06,932 - data_pipeline - INFO - Search response status: 200
+2025-06-10 09:50:06,943 - data_pipeline - INFO - Found 200 papers
+2025-06-10 09:50:08,947 - embedding-engine - INFO - Using device: cpu
+2025-06-10 09:50:08,949 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-10 09:50:10,396 - embedding-engine - INFO - Document processor initialized
+2025-06-10 09:50:10,396 - embedding-engine - INFO - converting 200 paper documents
+2025-06-10 09:50:12,486 - embedding-engine - INFO - Existing collections: ['rag']
+2025-06-10 09:50:12,571 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-10 09:50:12,571 - embedding-engine - INFO - Building rag vectorstore
+2025-06-10 09:50:14,781 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-10 09:50:16,848 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-10 09:50:16,854 - embedding-engine - INFO - Collection rag contains 200 documents
+2025-06-10 09:50:16,886 - embedding-engine - INFO - Vectorstore loaded with 200 documents
+2025-06-10 09:50:16,891 - qa_engine - INFO - Google gemini llm initialized
+2025-06-10 09:50:16,921 - embedding-engine - INFO - Vectorstore loaded with 200 documents
+2025-06-10 09:53:01,665 - data_pipeline - INFO - Search response status: 200
+2025-06-10 09:53:01,680 - data_pipeline - INFO - Found 330 papers
+2025-06-10 09:53:03,685 - embedding-engine - INFO - Using device: cpu
+2025-06-10 09:53:03,686 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-10 09:53:05,663 - embedding-engine - INFO - Document processor initialized
+2025-06-10 09:53:05,663 - embedding-engine - INFO - converting 330 paper documents
+2025-06-10 09:53:07,706 - embedding-engine - INFO - Existing collections: ['rag']
+2025-06-10 09:53:07,776 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-10 09:53:07,776 - embedding-engine - INFO - Found existing collection rag, attempting to delete
+2025-06-10 09:53:07,776 - embedding-engine - ERROR - failed to delete old instances of rag vectorstore: Collection [rag] does not exists
+2025-06-10 09:53:07,777 - embedding-engine - INFO - Building rag vectorstore
+2025-06-10 09:53:10,036 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-10 09:53:12,144 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-10 09:53:14,169 - embedding-engine - INFO - Added batch 3, total documents: 300
+2025-06-10 09:53:14,975 - embedding-engine - INFO - Added batch 4, total documents: 330
+2025-06-10 09:53:14,984 - embedding-engine - INFO - Collection rag contains 330 documents
+2025-06-10 09:53:15,019 - embedding-engine - INFO - Vectorstore loaded with 330 documents
+2025-06-10 09:53:15,025 - qa_engine - INFO - Google gemini llm initialized
+2025-06-10 09:53:15,055 - embedding-engine - INFO - Vectorstore loaded with 330 documents
+2025-06-10 09:56:25,705 - data_pipeline - INFO - Search response status: 200
+2025-06-10 09:56:25,723 - data_pipeline - INFO - Found 290 papers
+2025-06-10 09:56:27,728 - embedding-engine - INFO - Using device: cpu
+2025-06-10 09:56:27,730 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-10 09:56:29,428 - embedding-engine - INFO - Document processor initialized
+2025-06-10 09:56:29,428 - embedding-engine - INFO - converting 290 paper documents
+2025-06-10 09:56:31,474 - embedding-engine - INFO - Existing collections: ['rag']
+2025-06-10 09:56:31,474 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-10 09:56:31,474 - embedding-engine - INFO - Found existing collection rag, attempting to delete
+2025-06-10 09:56:31,548 - embedding-engine - INFO - Successfully deleted old rag vectorstore
+2025-06-10 09:56:31,548 - embedding-engine - INFO - Building rag vectorstore
+2025-06-10 09:56:34,016 - embedding-engine - INFO - Added batch 1, total documents: 100
+2025-06-10 09:56:36,200 - embedding-engine - INFO - Added batch 2, total documents: 200
+2025-06-10 09:56:38,099 - embedding-engine - INFO - Added batch 3, total documents: 290
+2025-06-10 09:56:38,107 - embedding-engine - INFO - Collection rag contains 290 documents
+2025-06-10 09:56:38,150 - embedding-engine - INFO - Vectorstore loaded with 290 documents
+2025-06-10 09:56:38,156 - qa_engine - INFO - Google gemini llm initialized
+2025-06-10 09:56:38,186 - embedding-engine - INFO - Vectorstore loaded with 290 documents
