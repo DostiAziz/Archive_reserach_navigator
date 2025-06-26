@@ -7,13 +7,13 @@ ENV/
 virtualenv/
 venv/*
 
-
 # Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
 *.pyo
+.pytest_cache/
 
 # OS files
 .DS_Store
@@ -27,13 +27,13 @@ desktop.ini
 
 # IDE files (don't need in container)
 .idea/
+*.iml
 .vscode/
 *.swp
 .cadence
 .idea/*
 
 .env
-
 
 # Environment secrets (use environment variables instead)
 .env*
@@ -58,3 +58,18 @@ Dockerfile
 # Temporary files
 *.tmp
 temp/
+
+# ADD THESE MISSING LINES:
+# Database files (ChromaDB)
+data/chromadb/
+*.sqlite3
+*.db
+
+# Logs
+*.log
+logs/
+log/
+
+# Application data
+data/
+cache/
