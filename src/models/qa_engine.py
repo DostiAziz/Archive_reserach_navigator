@@ -1,6 +1,6 @@
 import os
 from typing import List, Dict
-import torch
+import re
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFacePipeline
@@ -39,7 +39,7 @@ class QAEngine():
         # Load vector database
         self.emb_engine.load_vectorstore(collection_name=vs_instance_name)
 
-    def _setup_gemini_llm(self, model_name = 'gemini-2.0-flash'):
+    def _setup_gemini_llm(self, model_name='gemini-2.0-flash'):
         """Setup google gemini llm
         Args
          model_name (str): model name default gemini-2.0-flash
@@ -75,8 +75,6 @@ class QAEngine():
                 tokenizer=self.LOCAL_MODEL_NAME,
                 do_sample=True,
                 temperature=self.TEMPERATURE,
-                device= torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
             )
             self.llm = HuggingFacePipeline(pipeline=pipe,
                                            pipeline_kwargs={"return_full_text": False}
@@ -106,14 +104,20 @@ class QAEngine():
             logger.error(f"Failed to initialize language model {model_id}: {e}")
             raise
 
-    def perform_vectorstore_search(self, query: str, k: int = 5) -> List[Dict]:
+    def perform_vectorstore_search(self, query: str, is_author_query: bool, author_names: List[str], k: int = 5) -> \
+            List[
+                Dict]:
         """Retrieve similar content from vector store
         Args:
             query (str): query to search for in vector store
             k (int): number of results to return
+            is_author_query (bool): whether the query is about authors
+            author_names (List[str]): list of author names to search for
         """
 
-        return self.emb_engine.query_vectorstore(query=query, k=k)
+        return self.emb_engine.query_vectorstore(query=query, is_author_query=is_author_query,
+                                                 author_names=author_names,
+                                                 k=k)
 
     def format_context(self, retrieved_results: List[Dict]) -> str:
         """Format the retrieved results to separate context from the references
@@ -126,13 +130,34 @@ class QAEngine():
         content = ""
         sources = ""
         try:
-            logger.info("Formating retrieved results")
-            for index, result in enumerate(retrieved_results):
-                content = content + "\n" + result["content"]
-                sources += f'{index + 1}- {result["metadata"]["title"]}_'
+            logger.info("Formatting retrieved results")
 
-            final_content = f'Content: {content} + "\n\n" + Sources:\n {sources}'
-            logger.info(f'Length of formatted results {len(final_content)}')
+            # Create a structured format that makes author information prominent
+            content += "=== RESEARCH PAPERS DATABASE ===\n\n"
+
+            for index, result in enumerate(retrieved_results):
+                doc_num = index + 1
+                metadata = result.get("metadata", {})
+
+                # Extract metadata with fallbacks
+                title = metadata.get("title", "Unknown Title")
+                authors = metadata.get("authors", "Unknown Authors")
+                abstract = result.get("content", "Unknown Abstract")
+                year_published = metadata.get("year-published", "Unknown Year")
+
+                # Format each paper clearly
+                content += f"[PAPER {doc_num}]\n"
+                content += f"TITLE: {title}\n"
+                content += f"AUTHORS: {authors}\n"
+                content += f"ABSTRACT: {abstract}\n"
+                content += f"PUBLISHED YEAR: {year_published}\n"
+                content += "=" * 80 + "\n\n"
+
+                # Build sources reference list
+                sources += f'[{doc_num}] {title}\n'
+                sources += f" Authors: {authors}\n\n"
+
+            final_content = f'{content}\nSOURCES SUMMARY:\n{sources}'
             return final_content
         except Exception as e:
             logger.error(f"Failed to format retrieved results: {e}")
@@ -144,38 +169,134 @@ class QAEngine():
             PromptTemplate: RAG prompt template
         """
         template = """You are an AI research assistant analyzing academic papers. Use the following research paper
-               excerpts to answer the question. Be accurate, cite specific papers when possible, and acknowledge when
-               information is not available.
+               excerpts to answer the question. Understand what the user is asking. Each paper includes Abstract and metadata with authors, titles, publication year.
+               Be accurate, cite specific papers when possible, and acknowledge when information is not available.
 
                Research Paper Context:
                {context}
                Question: {question}
-               
+
                Instructions:
-               1. Provide a comprehensive answer based on the research papers.
-               2. Mention specific papers or authors when relevant, using the source numbers (e.g., [1], [2]).
-               3. If the papers don't contain enough information, say so clearly.
-               4. Use academic language appropriate for research.
-               5. At the end of your generated answer, list the sources you have used as a reference, in this format:
-              
+               1. Pay special attention to author names, the author names are included in the context.
+               2. When asked about authors, search through ALL the paper and try to find where author names are mentioned.
+               4. Mention specific papers or authors when relevant, using the source numbers (e.g., [1], [2]).
+               5. If you cannot find information about a specific author, clearly state "No papers by [author name] were found in the provided context."
+               6. Use academic language appropriate for research.
+               7. At the end of your generated answer, list the sources you have used as a reference, in this format:
+
               References:
-                
-                [1] Title of first paper
-                
-                [2] Title of second paper
-                
-                [3] Title of third paper
+
+                [1] Title of first paper - Authors
+
+                [2] Title of second paper - Authors
+
+                [3] Title of third paper - Authors
 
                 Only cite papers that are directly relevant to the answer. 
-               
+
                 Make sure each reference is on its own line with proper spacing.
 
-        
                """
         return PromptTemplate(
             template=template,
             input_variables=['context', 'question']
         )
+
+    def author_detector_prompt_simple(self) -> PromptTemplate:
+        """Create a simple author detector prompt template
+        Returns:
+            PromptTemplate: author detector prompt template
+        """
+        template = """You are an AI assistant that detects if a query is asking about specific authors.
+
+        Query: "{query}"
+
+        Answer with EXACTLY this format:
+        IS_AUTHOR_QUERY: [YES/NO]
+        AUTHOR_NAME: [author name if detected, otherwise NONE]
+
+        Guidelines:
+        - Answer YES if the query is asking about papers, research, or work by a specific author
+        - Answer NO if it's a general topic query not focused on specific authors
+        - For AUTHOR_NAME, extract the main author mentioned, or write NONE if no specific author
+        - If multiple authors are mentioned, return all of them as a comma-separated 
+
+        Examples:
+        Query: "papers by John Smith"
+        IS_AUTHOR_QUERY: YES
+        AUTHOR_NAME: John Smith
+
+        Query: "what is machine learning"
+        IS_AUTHOR_QUERY: NO
+        AUTHOR_NAME: NONE
+        
+        Query: "research on quantum computing by Alice Johnson and Bob Lee"
+        IS_AUTHOR_QUERY: YES
+        AUTHOR_NAME: Alice Johnson, Bob Lee
+        
+        Query: "latest advancements in AI"
+        IS_AUTHOR_QUERY: NO
+        AUTHOR_NAME: NONE
+        
+        Query: "Papers by Mark and Jane Doe"
+        IS_AUTHOR_QUERY: YES
+        AUTHOR_NAME: Mark, Jane Doe
+        
+
+        Query: "Einstein's work on relativity"
+        IS_AUTHOR_QUERY: YES
+        AUTHOR_NAME: Einstein
+
+        Now analyze:
+        """
+        return PromptTemplate(
+            template=template,
+            input_variables=['query']
+        )
+
+    def detect_author_query_simple(self, query: str) -> tuple[int, List[str]]:
+        """Simple LLM-based author detection
+        Args:
+            query (str): user query to analyze
+        Returns:
+            tuple[int, str]: (1, author_name) if author query detected, (0, "") if not
+        """
+        try:
+            # Get the prompt template
+            prompt = self.author_detector_prompt_simple()
+
+            # Format and invoke LLM
+            formatted_prompt = prompt.format(query=query)
+            response = self.llm.invoke(formatted_prompt)
+
+            # Extract content
+            if hasattr(response, 'content'):
+                response_text = response.content
+            else:
+                response_text = str(response)
+
+            # Parse the response
+            is_author_query = 0
+            author_names = []
+
+            lines = response_text.strip().split('\n')
+            for line in lines:
+                if line.startswith('IS_AUTHOR_QUERY:'):
+                    answer = line.split(':', 1)[1].strip().upper()
+                    is_author_query = 1 if answer == 'YES' else 0
+                elif line.startswith('AUTHOR_NAME:'):
+                    author_name = line.split(':', 1)[1].strip()
+                    if author_name.upper() == 'NONE':
+                        author_names = []
+                    else:
+                        author_names = [name.strip() for name in author_name.split(',')]
+
+            logger.info(f"Author detection result: is_author={is_author_query}, author='{author_names}'")
+            return is_author_query, author_names
+
+        except Exception as e:
+            logger.error(f"Error in simple LLM author detection: {e}")
+            return 0, []
 
     def generate_answer(self, query: str) -> str:
         """Generate an answer using RAG approach
@@ -185,8 +306,21 @@ class QAEngine():
             str: generated answer
         """
         try:
+            # Use LLM to detect author queries
+            is_author_query, author_name = self.detect_author_query_simple(query)
+            logger.info(f"Author query detection: {is_author_query}, author name: {author_name}")
+
+            if is_author_query:
+                logger.info(f"Author query detected for: {author_name}")
+                # Modify the search strategy for author queries
+                k_value = self.DEFAULT_SEARCH_RESULTS * 2
+
+            else:
+                k_value = self.DEFAULT_SEARCH_RESULTS
+
             # Get context from vector search
-            retrieved_results = self.perform_vectorstore_search(query=query, k=self.DEFAULT_SEARCH_RESULTS)
+            retrieved_results = self.perform_vectorstore_search(query=query, is_author_query=bool(is_author_query),
+                                                                author_names=author_name, k=k_value)
             context = self.format_context(retrieved_results)
 
             if not context:
@@ -200,18 +334,54 @@ class QAEngine():
                 question=query
             )
 
+            logger.info(f"Prompt formatted: {formatted_prompt}")
+
             # Invoke LLM with formatted prompt
             response = self.llm.invoke(formatted_prompt)
 
             # Return content based on a response type
             if hasattr(response, 'content'):
-                return response.content
+                response = response.content
             else:
-                return str(response)
+                response = str(response)
+
+            references = response.split("References:")[1].strip()
+            formatted_references = self.format_references(references)
+
+            answer = response.split("References:")[0].strip()
+            final_answer = f"{answer}\n\n{formatted_references}"
+
+            return final_answer
+
 
         except Exception as e:
             logger.error(f"Error generating answer: {e}")
             return f"Sorry, I encountered an error while processing your query: {str(e)}"
+
+    def format_references(self, answer: str) -> str:
+        """Format the references in the answer
+        Args:
+            answer (str): generated answer
+        Returns:
+            str: formatted answer with references
+        """
+        if not answer:
+            return "No references found."
+
+        # Split by pattern that looks like "] [number]"
+        references = re.split(r']\s*\[(?=\d)', answer)
+
+        # Clean up the results
+        cleaned_refs = []
+        for i, ref in enumerate(references):
+            if i == 0:
+                # First reference already has opening bracket
+                cleaned_refs.append(ref)
+            else:
+                # Add opening bracket to subsequent references
+                cleaned_refs.append('[' + ref + ']')
+
+        return '\n'.join(cleaned_refs)
 
 # if __name__ == '__main__':
 #     from src.models.embedding_engine import DocumentProcessor

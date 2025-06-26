@@ -1,7 +1,6 @@
 import os
 from typing import List, Dict
 import pandas as pd
-import torch
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
@@ -11,18 +10,15 @@ from utils.logger_config import get_logger
 
 from config import Config
 
+
 logger = get_logger("embedding-engine")
 
 
 class DocumentProcessor:
 
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        logger.info(f"Using device: {device}")
-
         # Embedding model for creating vector database
         self.embedding_model = HuggingFaceEmbeddings(model_name=embedding_model,
-                                                     model_kwargs={'device': device},
                                                      encode_kwargs={'normalize_embeddings': True}
                                                      )
         self.persistent_directory = Config.VECTOR_STORE_DIR
